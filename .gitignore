@@ -1,0 +1,22 @@
+# vscode config json files
+.vscode
+
+# binary local repository
+bin
+
+# local executable or binary and static linker
+*.exe
+*.out
+*.a
+*.so
+*.dll
+
+# build local repository
+build
+
+# example local assets
+resources/img
+resources/font
+
+# raylib local library header
+lib/raylib/include/*.h
