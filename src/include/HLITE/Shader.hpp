@@ -9,6 +9,7 @@ constexpr int MAX_LIGHTS = 32;
 
 namespace HLITE
 {
+    // Shader support.
     namespace SHADERS
     {
         namespace GRAPHICS_2D

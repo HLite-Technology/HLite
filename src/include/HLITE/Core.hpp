@@ -19,7 +19,7 @@ namespace HLITEMain
 
 namespace HLITE
 {
-    // HLGE core.
+    // HLGE core support.
     namespace CORE
     {
         // Window class attribute settings.

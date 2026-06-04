@@ -6,6 +6,7 @@
 
 namespace HLITE
 {
+    // Graphics 2D support.
     namespace GRAPHICS_2D
     {
         // Particle type support (Selection) (Todo...).

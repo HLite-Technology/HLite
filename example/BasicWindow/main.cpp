@@ -17,12 +17,12 @@ void HLITEMain::Init()
     hWnd.Register();
 
     txTitle.SetText(text.data());
+    txTitle.SetSize(50);
     txTitle.SetPosition((Vector2)
     {
-        GET_CENTER_TEXT_X_FLOAT(text.data(), text.size()), 
-        GET_CENTER_TEXT_Y_FLOAT(text.size())
+        GET_CENTER_DEFAULT_TEXT_FONT_X_FLOAT(text.data(), txTitle.GetSize()), 
+        GET_CENTER_DEFAULT_TEXT_FONT_Y_FLOAT(text.data(), txTitle.GetSize())
     });
-    txTitle.SetSize(35);
     txTitle.SetTextColor(ORANGE);
     txTitle.SetTextOutline(RED);
 }

@@ -6,6 +6,7 @@
 
 namespace HLITE
 {
+    // User interfaces support.
     namespace UI
     {
         // Primitive label (default).
