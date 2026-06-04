@@ -1,6 +1,6 @@
 # HLITE Framework
 
-## ⚖ LICENSE ⚖
+## LICENSE
 
 ```txt
 MIT License
