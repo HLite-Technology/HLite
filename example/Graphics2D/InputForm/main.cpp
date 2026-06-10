@@ -85,7 +85,6 @@ void HLITEMain::Update()
 
     submitBtn.Update();
     
-
     if (clearBtn.Update())
     {
         if (!usernameField.GetText().empty()) usernameField.SetText("");
