@@ -27,12 +27,13 @@ namespace HLITE
         {
         public:
             Window() {}
-            Window(int WindowWidth, int WindowHeight, const char *WindowTitle) : 
+            Window(int WindowWidth, int WindowHeight, const char *WindowTitle, bool windowResizeable) : 
             windowWidth(WindowWidth), windowHeight(WindowHeight), 
-            windowTitle(const_cast<char*>(WindowTitle)) {}
+            windowTitle(const_cast<char*>(WindowTitle)),  canResizeable(windowResizeable) {}
 
             void SetWindowSize(int WindowWidth, int WindowHeight);
             void SetWindowTitle(const char *WindowTitle);
+            void SetWindowResizeable(bool resizeable);
             void SetWindowFPS(int WindowFps);
             void SetWindowBackgroundColor(Color BackgroundColor);
 
@@ -49,6 +50,7 @@ namespace HLITE
             int windowWidth;
             int windowHeight;
             char *windowTitle = nullptr;
+            bool canResizeable = false;
         };
 
         // App running class.
@@ -62,40 +64,5 @@ namespace HLITE
                 void (*WindowUnload)()
             );
         }
-
-        // Key combine support (Todo...).
-        namespace Key
-        {
-            // Combination of 2 keys that are pressed (Todo...).
-            bool isCombine_2Key(bool key1, bool key2, float maxDelay);
-            // Combination of 3 keys that are pressed (Todo....).
-            bool isCombine_3Key(bool key1, bool key2, bool key3, float maxDelay);
-        }
-
-        // Countdown timer support.
-        class Countdown
-        {
-        public:
-            Countdown() {}
-            Countdown(int Minutes, int Seconds, float Delay) : 
-            minutes(Minutes), seconds(Seconds), setterDelay(Delay) {}
-
-            void SetMinutes(int Minutes) { minutes = Minutes; }
-            void SetSeconds(int Seconds) { seconds = Seconds; }
-            void SetDelay(float Delay) { setterDelay = Delay; }
-
-            int GetMinutes() { return minutes; }
-            int GetSeconds() { return seconds; }
-
-            // Update the timer that will be decreased (true if active, false if the time is up).
-            bool Update();
-            // Getting the text form from the timer.
-            std::string Str(); 
-        private:
-            int minutes;
-            int seconds;
-            float setterDelay;
-            float countDelay;
-        };
     }
 }

@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.12)
-project(HLiteProject CXX)
+project(HLiteProject CXX) # Your main project name;
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(exec_name "main")
-set(hlite_name_static "hlite")
-set(main_code "example/BasicWindow/main.cpp")
+set(exec_name "main") # Your main executable name.
+set(main_code "example/Graphics2D/BasicWindow/main.cpp") # Your main source code.
 
+set(hlite_name_static "hlite")
 set(RAYLIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/raylib")
 set(RAYLIB_INCLUDE_DIR "${RAYLIB_DIR}/include")
 set(RAYLIB_STATIC_LIB "${RAYLIB_DIR}/libraylib.a")
@@ -15,6 +15,7 @@ set(RAYLIB_STATIC_LIB "${RAYLIB_DIR}/libraylib.a")
 add_library(${hlite_name_static}
     STATIC
     src/source/Core.cpp
+    src/source/Utility.cpp
     src/source/File.cpp
     src/source/Graphics2D.cpp
     src/source/HLiteMain.cpp
