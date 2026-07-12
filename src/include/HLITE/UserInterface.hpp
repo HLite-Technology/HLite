@@ -21,8 +21,8 @@ namespace HLITE
         class Label
         {
         public:
-            Label(){}
-            Label(const char *text) : 
+            explicit Label(){}
+            explicit Label(const char *text) : 
             text(text), position({0.0f, 0.0f}), size(25), textOutline(BLACK), textColor(WHITE) {}
             Label(std::string text, Vector2 position, int size, Color textOutline, Color textColor) :
             text(text), position(position), size(size), textOutline(textOutline), textColor(textColor) {}
@@ -58,9 +58,9 @@ namespace HLITE
         class LabelEx : Label
         {
         public:
-            LabelEx(){}
-            LabelEx(Font& font, const char *text) : font(font), text(text), position({0.0f, 0.0f}), rotation(0.0f), fontSize(25), spacing(1), textOutline(BLACK), textColor(WHITE) {}
-            LabelEx(Font& textFont, std::string text, Vector2 position, float rotation, int size, float spacing, Color textOutline, Color textColor) :
+            explicit LabelEx(){}
+            explicit LabelEx(Font& font, const char *text) : font(font), text(text), position({0.0f, 0.0f}), rotation(0.0f), fontSize(25), spacing(1), textOutline(BLACK), textColor(WHITE) {}
+            explicit LabelEx(Font& textFont, std::string text, Vector2 position, float rotation, int size, float spacing, Color textOutline, Color textColor) :
             font(textFont), text(text), position(position), rotation(rotation), fontSize(size), spacing(spacing), textOutline(textOutline), textColor(textColor) {}
 
             void SetFont(Font textFont) { font = textFont; }
@@ -104,8 +104,8 @@ namespace HLITE
         class Button
         {
         public:
-            Button(){}
-            Button(const Label& text) : text(text), position({0.0f, 0.0f}), isHover(false), isClicked(false),
+            explicit Button(){}
+            explicit Button(const Label& text) : text(text), position({0.0f, 0.0f}), isHover(false), isClicked(false),
             outlineColorBtn(BLACK), mainColorBtn(WHITE) {}
             Button(
                 const Label& text,
@@ -139,7 +139,7 @@ namespace HLITE
         class TextField
         {
         public:
-            TextField()
+            explicit TextField()
             {
                 canEditable = true;
                 mouseOnText = false;
@@ -157,11 +157,31 @@ namespace HLITE
                 mode = TextFieldMode::DEFAULT;
             }
 
-            // Todo....
-            TextField(const char *placeholders, int len, int size)
+            explicit TextField(bool canEditable)
             {
                 this->placeholders = placeholders;
-                canEditable = true;
+                this->canEditable = canEditable;
+                mouseOnText = false;
+                isMouseFocusText = false;
+                frameCounter = 0;
+                this->textBox = {0.0f, 0.0f, 0.0f, 0.0f};
+                this->textSize = 10;
+                this->boxPadding = 5;
+                this->mode = TextFieldMode::DEFAULT;
+                maxLength = 9;
+                hndText.reserve(9);
+                texCol = BLACK;
+                boxCol = WHITE;
+                offHoverBoxCol = DARKGRAY;
+                onHoverBoxCol = YELLOW;
+                delay.SetDuration(0.1f);
+            }
+
+            // Todo....
+            explicit TextField(const char *placeholders, int len, int size, bool canEditable)
+            {
+                this->placeholders = placeholders;
+                this->canEditable = canEditable;
                 mouseOnText = false;
                 isMouseFocusText = false;
                 frameCounter = 0;
@@ -202,25 +222,25 @@ namespace HLITE
                 delay.SetDuration(0.1f);
             }
 
-            virtual void SetText(const char *text);
-            virtual void SetPlaceholders(const char *text);
-            virtual void SetEditable(bool canEdit);
-            virtual void SetMaxLength(int len);
-            virtual void SetSizeBox(Rectangle sizeBox);
-            virtual void SetBoxPadding(int padding);
-            virtual void SetFieldMode(TextFieldMode mode);
-            virtual void SetTextSize(int size);
-            virtual void SetTextColor(Color color);
-            virtual void SetBoxColor(Color mainColor, Color offHoverBoxColor, Color onHoverBoxColor);
+            void SetText(const char *text);
+            void SetPlaceholders(const char *text);
+            void SetEditable(bool canEdit);
+            void SetMaxLength(int len);
+            void SetSizeBox(Rectangle sizeBox);
+            void SetBoxPadding(int padding);
+            void SetFieldMode(TextFieldMode mode);
+            void SetTextSize(int size);
+            void SetTextColor(Color color);
+            void SetBoxColor(Color mainColor, Color offHoverBoxColor, Color onHoverBoxColor);
 
-            virtual Vector2 GetPosition();
-            virtual std::size_t GetMaxLen();
-            virtual std::string GetText();
+            Vector2 GetPosition();
+            std::size_t GetMaxLen();
+            std::string GetText();
 
             // Update logic text field input.
-            void Update();
+            virtual void Update();
             // Render text field input.
-            void Draw();
+            virtual void Draw();
         protected:
             bool canEditable;
             bool mouseOnText;
@@ -238,6 +258,72 @@ namespace HLITE
             Color offHoverBoxCol;
             Color onHoverBoxCol;
             HLITE::UTIL::Delay delay;
+        };
+
+        // Primitive text area (default, Todo...)
+        class TextArea : public TextField
+        {
+        public:
+            explicit TextArea()
+            {
+                canEditable = true;
+                mouseOnText = false;
+                isMouseFocusText = false;
+                frameCounter = 0;
+                textSize = 10;
+                maxLength = 255;
+                boxPadding = 5;
+                hndText.reserve(9);
+                texCol = MAROON;
+                boxCol = GRAY;
+                offHoverBoxCol = DARKGRAY;
+                onHoverBoxCol = RED;
+                delay.SetDuration(0.1f);
+                mode = TextFieldMode::DEFAULT;
+            }
+
+            explicit TextArea(bool canEditable)
+            {
+                this->placeholders = placeholders;
+                this->canEditable = canEditable;
+                mouseOnText = false;
+                isMouseFocusText = false;
+                frameCounter = 0;
+                this->textBox = {0.0f, 0.0f, 0.0f, 0.0f};
+                this->textSize = 10;
+                this->boxPadding = 5;
+                this->mode = TextFieldMode::DEFAULT;
+                maxLength = 255;
+                hndText.reserve(9);
+                texCol = BLACK;
+                boxCol = WHITE;
+                offHoverBoxCol = DARKGRAY;
+                onHoverBoxCol = YELLOW;
+                delay.SetDuration(0.1f);
+            }
+
+            // Todo....
+            explicit TextArea(const char *placeholders, int len, int size, bool canEditable)
+            {
+                this->placeholders = placeholders;
+                this->canEditable = canEditable;
+                mouseOnText = false;
+                isMouseFocusText = false;
+                frameCounter = 0;
+                this->textBox = {0.0f, 0.0f, 0.0f, 0.0f};
+                this->textSize = size;
+                this->boxPadding = 5;
+                this->mode = TextFieldMode::DEFAULT;
+                hndText.reserve(len);
+                texCol = BLACK;
+                boxCol = WHITE;
+                offHoverBoxCol = DARKGRAY;
+                onHoverBoxCol = YELLOW;
+                delay.SetDuration(0.1f);
+            }
+
+            void Update() override;
+            void Draw() override;
         };
     }
 }

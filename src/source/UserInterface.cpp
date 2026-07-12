@@ -410,8 +410,21 @@ namespace HLITE
             if (!canEditable)
             {
                 DrawRectangleRec(textBox, boxCol);
-                DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, offHoverBoxCol);
+                if (isMouseFocusText)
+                    DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, onHoverBoxCol);
+                else
+                    DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, offHoverBoxCol);
+
+                if (mode == TextFieldMode::DEFAULT)
+                    BeginScissorMode((int)textBox.x + boxPadding, (int)textBox.y, (int)textBox.width - (boxPadding * 2), (int)textBox.height);
+
+                if (hndText.empty())
+                    DrawText(placeholders.data(), (int)textBox.x + boxPadding, (int)textBox.y + boxPadding, textSize, (Color){200, 200, 200, 155});
+
                 DrawText(hndText.data(), (int)textBox.x + boxPadding, (int)textBox.y + boxPadding, textSize, texCol);
+
+                if (mode == TextFieldMode::DEFAULT)
+                    EndScissorMode();
                 return;
             }
 
@@ -446,6 +459,154 @@ namespace HLITE
                 }
             }
 
+            if (mode == TextFieldMode::DEFAULT)
+                EndScissorMode();
+        }
+
+        /*
+         * Primitive Text Area Class
+         */
+
+        void TextArea::Update()
+        {
+            if (!canEditable) return;
+        
+            if (CheckCollisionPointRec(GetMousePosition(), textBox)) mouseOnText = true;
+            else mouseOnText = false;
+        
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            {
+                if (mouseOnText) isMouseFocusText = true;
+                else isMouseFocusText = false;
+            }
+        
+            if (isMouseFocusText)
+            {
+                if (IsKeyPressed(KEY_ENTER))
+                {
+                    if (hndText.length() < maxLength)
+                        hndText.push_back('\n');
+                }
+            
+                int key = GetCharPressed();
+                while (key > 0)
+                {
+                    if ((key >= 32) && (key <= 125) && (hndText.length() < maxLength))
+                    {
+                        if (mode == TextFieldMode::STATIC)
+                        {
+                            // [PERUBAHAN]: Hanya ukur panjang teks pada baris terakhir untuk pembatasan input
+                            std::size_t lastNewline = hndText.find_last_of('\n');
+                            std::string lastLine = (lastNewline == std::string::npos) ? hndText : hndText.substr(lastNewline + 1);
+
+                            std::string nextText = lastLine + static_cast<char>(key);
+                            int nextTextWidth = MeasureText(nextText.c_str(), textSize);
+                            int cursorWidth = MeasureText("_", textSize);
+                            int maxAllowedWidth = (int)textBox.width - (boxPadding * 2) - cursorWidth;
+                        
+                            if (nextTextWidth < maxAllowedWidth)
+                                hndText.push_back(static_cast<char>(key));
+                        }
+                    
+                        if (mode == TextFieldMode::DEFAULT)
+                            hndText.push_back(static_cast<char>(key));
+                    }
+                
+                    key = GetCharPressed();
+                }
+            
+                if (IsKeyDown(KEY_BACKSPACE))
+                {
+                    if (IsKeyPressed(KEY_BACKSPACE))
+                    {
+                        if (!hndText.empty())
+                            hndText.pop_back();
+                        return;
+                    }
+                
+                    if (delay.GetIsDone()) delay.Reset();
+                
+                    if (delay.Update())
+                    {
+                        if (!hndText.empty())
+                            hndText.pop_back();
+                    }
+                }
+            
+                frameCounter++;
+            }
+            else frameCounter = 0;
+        }
+
+        void TextArea::Draw()
+        {
+            if (!canEditable)
+            {
+                DrawRectangleRec(textBox, boxCol);
+                if (isMouseFocusText)
+                    DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, onHoverBoxCol);
+                else
+                    DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, offHoverBoxCol);
+            
+                if (mode == TextFieldMode::DEFAULT)
+                    BeginScissorMode((int)textBox.x + boxPadding, (int)textBox.y, (int)textBox.width - (boxPadding * 2), (int)textBox.height);
+            
+                if (hndText.empty())
+                    DrawText(placeholders.data(), (int)textBox.x + boxPadding, (int)textBox.y + boxPadding, textSize, (Color){200, 200, 200, 155});
+            
+                DrawText(hndText.data(), (int)textBox.x + boxPadding, (int)textBox.y + boxPadding, textSize, texCol);
+            
+                if (mode == TextFieldMode::DEFAULT)
+                    EndScissorMode();
+                return;
+            }
+        
+            DrawRectangleRec(textBox, boxCol);
+            if (isMouseFocusText)
+                DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, onHoverBoxCol);
+            else
+                DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, offHoverBoxCol);
+        
+            if (mode == TextFieldMode::DEFAULT)
+                BeginScissorMode((int)textBox.x + boxPadding, (int)textBox.y, (int)textBox.width - (boxPadding * 2), (int)textBox.height);
+        
+            if (hndText.empty())
+                DrawText(placeholders.data(), (int)textBox.x + boxPadding, (int)textBox.y + boxPadding, textSize, (Color){200, 200, 200, 155});
+
+            DrawText(hndText.data(), (int)textBox.x + boxPadding, (int)textBox.y + boxPadding, textSize, texCol);
+        
+            if (isMouseFocusText)
+            {
+                if (hndText.length() < maxLength)
+                {
+                    if (((frameCounter / 20) % 2) == 0)
+                    {
+                        int lineCount = 0;
+                        std::size_t lastNewline = hndText.find_last_of('\n');
+                        std::string lastLine = (lastNewline == std::string::npos) ? hndText : hndText.substr(lastNewline + 1);
+
+                        for (char c : hndText) {
+                            if (c == '\n') lineCount++;
+                        }
+                    
+                        int cursorX;
+                        int cursorY = (int)textBox.y + boxPadding + (lineCount * textSize);
+                    
+                        if (mode == TextFieldMode::DEFAULT)
+                        {
+                            cursorX = (int)textBox.x + boxPadding + MeasureText(lastLine.c_str(), textSize);
+                            DrawText("_", cursorX, cursorY, textSize, texCol);
+                        }
+                        else 
+                        {
+                            cursorX = (int)textBox.x + (12 - boxPadding) + MeasureText(lastLine.c_str(), textSize);
+                            cursorY = (int)textBox.y + (10 - boxPadding) + (lineCount * textSize);
+                            DrawText("_", cursorX, cursorY, textSize, texCol);
+                        }
+                    }
+                }
+            }
+        
             if (mode == TextFieldMode::DEFAULT)
                 EndScissorMode();
         }

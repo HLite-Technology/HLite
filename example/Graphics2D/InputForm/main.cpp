@@ -1,6 +1,9 @@
 #include "HLITE/Core.hpp"
 #include "HLITE/UserInterface.hpp"
 
+#include <array>
+#include <format>
+
 HLITE::CORE::Window wc;
 
 HLITE::UI::Label txTitle("HLITE FORM");
@@ -9,6 +12,7 @@ HLITE::UI::Label txPrompAge("Age");
 
 HLITE::UI::TextField usernameField;
 HLITE::UI::TextField ageField;
+HLITE::UI::TextArea resultArea(false);
 
 HLITE::UI::Button submitBtn({"submit", {0.0f, 0.0f}, 20, BLACK, WHITE});
 HLITE::UI::Button clearBtn({"clear", {0.0f, 0.0f}, 21, BLACK, WHITE});
@@ -69,6 +73,19 @@ void HLITEMain::Init()
     ageField.SetTextColor(BLACK);
     ageField.SetBoxColor(WHITE, DARKGRAY, LIME);
 
+    resultArea.SetSizeBox((Rectangle){
+        .x = 20.0f,
+        .y = 240.0f,
+        .width = 365.0f,
+        .height = 50.0f
+    });
+    resultArea.SetBoxPadding(5);
+    resultArea.SetFieldMode(HLITE::UI::TextFieldMode::DEFAULT);
+    resultArea.SetMaxLength(100);
+    resultArea.SetTextSize(15);
+    resultArea.SetTextColor(BLACK);
+    resultArea.SetBoxColor(WHITE, DARKGRAY, LIME);
+
     submitBtn.SetPosition((Vector2){100.0f, 200.0f});
     submitBtn.SetMainColorBtn(GRAY);
     submitBtn.SetOutlineColorBtn(DARKGRAY);
@@ -82,13 +99,26 @@ void HLITEMain::Update()
 {
     usernameField.Update();
     ageField.Update();
+    resultArea.Update();
 
-    submitBtn.Update();
+    if (submitBtn.Update())
+    {
+        std::array<char, 255> buffer;
+
+        auto results = std::format_to(buffer.data(),
+                                      "My name is {}. I\'am {} years old.", 
+                                      usernameField.GetText(), 
+                                      ageField.GetText());
+        *results = '\0';
+
+        resultArea.SetText(buffer.data());
+    }
     
     if (clearBtn.Update())
     {
         if (!usernameField.GetText().empty()) usernameField.SetText("");
         if (!ageField.GetText().empty()) ageField.SetText("");
+        if (!resultArea.GetText().empty()) resultArea.SetText("");
     }
 }
 
@@ -100,6 +130,7 @@ void HLITEMain::Render()
 
     usernameField.Draw();
     ageField.Draw();
+    resultArea.Draw();
 
     submitBtn.Draw();
     clearBtn.Draw();

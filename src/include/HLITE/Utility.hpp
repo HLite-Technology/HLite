@@ -19,13 +19,13 @@ namespace HLITE
         class Delay
         {
         public:
-            Delay()
+            explicit Delay()
             {
                 isDone = false;
                 counter = 0.0f;
                 duration = 2.0f; // Two seconds.
             }
-            Delay(float duration) : isDone(false), counter(0.0f), duration(duration) {}
+            explicit Delay(float duration) : isDone(false), counter(0.0f), duration(duration) {}
 
             void SetDuration(float duration);
             bool GetIsDone();
@@ -42,8 +42,8 @@ namespace HLITE
         class Countdown
         {
         public:
-            Countdown() {}
-            Countdown(int Minutes, int Seconds, float Delay) : 
+            explicit Countdown() {}
+            explicit Countdown(int Minutes, int Seconds, float Delay) : 
             minutes(Minutes), seconds(Seconds), setterDelay(Delay) {}
 
             void SetMinutes(int Minutes) { minutes = Minutes; }

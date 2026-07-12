@@ -11,6 +11,9 @@ bin
 *.so
 *.dll
 
+# local initialitation file
+*.ini
+
 # build local repository
 build
 

@@ -26,8 +26,8 @@ namespace HLITE
         class Window
         {
         public:
-            Window() {}
-            Window(int WindowWidth, int WindowHeight, const char *WindowTitle, bool windowResizeable) : 
+            explicit Window() {}
+            explicit Window(int WindowWidth, int WindowHeight, const char *WindowTitle, bool windowResizeable) : 
             windowWidth(WindowWidth), windowHeight(WindowHeight), 
             windowTitle(const_cast<char*>(WindowTitle)),  canResizeable(windowResizeable) {}
 
