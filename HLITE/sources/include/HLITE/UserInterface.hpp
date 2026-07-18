@@ -17,14 +17,24 @@ namespace HLITE
             STATIC
         } TextFieldMode;
 
+        // Virtual message box all mode.
+        typedef enum
+        {
+            MB_DEFAULT,
+            MB_ICONERROR,
+            MB_ICONWARNING,
+            MB_ICONQUESTION,
+            MB_ICONINFORMATION
+        } VMessageBoxMode;
+
         // Primitive label (default).
         class Label
         {
         public:
-            explicit Label(){}
-            explicit Label(const char *text) : 
+            Label(){}
+            Label(const char *text) : 
             text(text), position({0.0f, 0.0f}), size(25), textOutline(BLACK), textColor(WHITE) {}
-            Label(std::string text, Vector2 position, int size, Color textOutline, Color textColor) :
+            Label(const char* text, Vector2 position, int size, Color textOutline, Color textColor) :
             text(text), position(position), size(size), textOutline(textOutline), textColor(textColor) {}
 
             void SetText(const char* text) { this->text = text; }
@@ -55,7 +65,7 @@ namespace HLITE
         };
 
         // Modern label (primitive label extend)
-        class LabelEx : Label
+        class LabelEx : public Label
         {
         public:
             explicit LabelEx(){}
@@ -64,23 +74,13 @@ namespace HLITE
             font(textFont), text(text), position(position), rotation(rotation), fontSize(size), spacing(spacing), textOutline(textOutline), textColor(textColor) {}
 
             void SetFont(Font textFont) { font = textFont; }
-            void SetText(const char *text) { this->text = text; }
-            void SetPosition(Vector2 position) { this->position = position; }
-            void SetSize(int size) { fontSize = size; }
             void SetRotation(float rotation) {this->rotation = rotation; }
             void SetSpacing(float spacing) { this->spacing = spacing; }
-            void SetTextOutline(Color color) { textOutline = color; }
-            void SetTextColor(Color color) { textColor = color; }
-
+            
             Font GetFont() { return font; }
-            std::string GetText() { return text; }
-            Vector2 GetPosition() { return position; }
-            int GetSize() { return fontSize; }
             Vector2 GetOrigin() { return origin; }
             float GetRotation() { return rotation; }
             float GetSpacing() { return spacing; }
-            Color GetOutlineColor() { return textOutline; }
-            Color GetColor() { return textColor; }
 
             // Render text in window.
             void Draw(unsigned char opacity) override;
@@ -107,7 +107,7 @@ namespace HLITE
             explicit Button(){}
             explicit Button(const Label& text) : text(text), position({0.0f, 0.0f}), isHover(false), isClicked(false),
             outlineColorBtn(BLACK), mainColorBtn(WHITE) {}
-            Button(
+            explicit Button(
                 const Label& text,
                 Vector2 position,
                 Color OutlineColorBtn, 
@@ -141,6 +141,7 @@ namespace HLITE
         public:
             explicit TextField()
             {
+                this->placeholders = "";
                 canEditable = true;
                 mouseOnText = false;
                 isMouseFocusText = false;
@@ -157,9 +158,9 @@ namespace HLITE
                 mode = TextFieldMode::DEFAULT;
             }
 
-            explicit TextField(bool canEditable)
+            explicit TextField(const bool canEditable)
             {
-                this->placeholders = placeholders;
+                this->placeholders = "";
                 this->canEditable = canEditable;
                 mouseOnText = false;
                 isMouseFocusText = false;
@@ -177,8 +178,7 @@ namespace HLITE
                 delay.SetDuration(0.1f);
             }
 
-            // Todo....
-            explicit TextField(const char *placeholders, int len, int size, bool canEditable)
+            explicit TextField(const char *placeholders, const int len, const int size, const bool canEditable)
             {
                 this->placeholders = placeholders;
                 this->canEditable = canEditable;
@@ -189,6 +189,7 @@ namespace HLITE
                 this->textSize = size;
                 this->boxPadding = 5;
                 this->mode = TextFieldMode::DEFAULT;
+                maxLength = len;
                 hndText.reserve(len);
                 texCol = BLACK;
                 boxCol = WHITE;
@@ -197,14 +198,14 @@ namespace HLITE
                 delay.SetDuration(0.1f);
             }
 
-            TextField(int maxLen, int textSize,
-                Rectangle textBox,
-                int boxPadding,
-                TextFieldMode& mode, 
-                Color textColor,
-                Color boxColor,
-                Color offHoverBoxColor,
-                Color onHoverBoxColor)
+            explicit TextField(const int maxLen, const int textSize,
+                const Rectangle textBox,
+                const int boxPadding,
+                const TextFieldMode& mode, 
+                const Color textColor,
+                const Color boxColor,
+                const Color offHoverBoxColor,
+                const Color onHoverBoxColor)
             {
                 canEditable = true;
                 mouseOnText = false;
@@ -260,12 +261,13 @@ namespace HLITE
             HLITE::UTIL::Delay delay;
         };
 
-        // Primitive text area (default, Todo...)
+        // Primitive text area (default)
         class TextArea : public TextField
         {
         public:
             explicit TextArea()
             {
+                this->placeholders = "";
                 canEditable = true;
                 mouseOnText = false;
                 isMouseFocusText = false;
@@ -282,9 +284,9 @@ namespace HLITE
                 mode = TextFieldMode::DEFAULT;
             }
 
-            explicit TextArea(bool canEditable)
+            explicit TextArea(const bool canEditable)
             {
-                this->placeholders = placeholders;
+                this->placeholders = "";
                 this->canEditable = canEditable;
                 mouseOnText = false;
                 isMouseFocusText = false;
@@ -302,8 +304,7 @@ namespace HLITE
                 delay.SetDuration(0.1f);
             }
 
-            // Todo....
-            explicit TextArea(const char *placeholders, int len, int size, bool canEditable)
+            explicit TextArea(const char *placeholders, const int len, const int size, const bool canEditable)
             {
                 this->placeholders = placeholders;
                 this->canEditable = canEditable;
@@ -314,6 +315,7 @@ namespace HLITE
                 this->textSize = size;
                 this->boxPadding = 5;
                 this->mode = TextFieldMode::DEFAULT;
+                maxLength = len;
                 hndText.reserve(len);
                 texCol = BLACK;
                 boxCol = WHITE;
@@ -324,6 +326,37 @@ namespace HLITE
 
             void Update() override;
             void Draw() override;
+        };
+
+        // Primitive virtual message box (Default, Todo...)
+        class VMessageBox
+        {
+        public:
+            explicit constexpr VMessageBox(){}
+            explicit constexpr VMessageBox(const char *title, const char *description, const Vector2& position)
+            : title(title), description(description), position(position){}
+            explicit constexpr VMessageBox(const char *title, const char *description, const Vector2& position,  const std::size_t& btnType)
+            : title(title), description(description), position(position), btnType(btnType){}
+            explicit constexpr VMessageBox(const char *title, const char *description, const Vector2& position,  const std::size_t& btnType, const VMessageBoxMode& mode)
+            : title(title), description(description), position(position), btnType(btnType), mode(mode){}
+
+            void SetTitle(const char *title);
+            void SetDescribe(const char *description);
+            void SetPosition(Vector2& position);
+            
+            const char *GetTitle();
+            const char *GetDescribe();
+            Vector2 GetPosition(); 
+
+            std::size_t Update();
+            void Draw();
+
+        private:
+            const char *title;
+            const char *description;
+            Vector2 position;
+            std::size_t btnType;
+            VMessageBoxMode mode;
         };
     }
 }

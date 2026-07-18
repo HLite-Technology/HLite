@@ -5,27 +5,28 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(exec_name "main") # Your main executable name.
-set(main_code "example/Graphics2D/BasicWindow/main.cpp") # Your main source code.
+set(main_code "example/Graphics2D/InputForm/main.cpp") # Your main source code.
 
 set(hlite_name_static "hlite")
-set(RAYLIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/raylib")
+set(HLITE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/HLITE/sources")
+set(RAYLIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/HLITE/lib/raylib")
 set(RAYLIB_INCLUDE_DIR "${RAYLIB_DIR}/include")
 set(RAYLIB_STATIC_LIB "${RAYLIB_DIR}/libraylib.a")
 
 add_library(${hlite_name_static}
     STATIC
-    src/source/Core.cpp
-    src/source/Utility.cpp
-    src/source/File.cpp
-    src/source/Graphics2D.cpp
-    src/source/HLiteMain.cpp
-    src/source/Shader.cpp
-    src/source/UserInterface.cpp
+    "${HLITE_DIR}/src/Core.cpp"
+    "${HLITE_DIR}/src/Utility.cpp"
+    "${HLITE_DIR}/src/File.cpp"
+    "${HLITE_DIR}/src/Graphics2D.cpp"
+    "${HLITE_DIR}/src/HLiteMain.cpp"
+    "${HLITE_DIR}/src/Shader.cpp"
+    "${HLITE_DIR}/src/UserInterface.cpp"
 )
 
 target_include_directories(${hlite_name_static}
     PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/include
+    "${HLITE_DIR}/include"
     ${RAYLIB_INCLUDE_DIR}
 )
 

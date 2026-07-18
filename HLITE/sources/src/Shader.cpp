@@ -16,7 +16,7 @@ namespace HLITE
                 shader = LoadShader(
                     0,
                     HLITE::FILE::GetPathFile(
-                        "src/HLITE/resources/shaders/core330/lighting.fs",
+                        "HLITE/resources/shaders/core330/lighting.fs",
                         false
                     )
                 );

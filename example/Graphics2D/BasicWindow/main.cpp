@@ -3,18 +3,13 @@
 
 #include <string_view>
 
-HLITE::CORE::Window wc;
+constinit HLITE::CORE::Window wc(Vector2{800, 600},
+    "HLITE - Basic Window", DARKBLUE, false, 60);
 HLITE::UI::Label txTitle;
 
 void HLITEMain::Init()
 {
     constexpr std::string_view text = "HLite its Awesome!";
-
-    wc.SetWindowTitle("HLITE - Basic Window");
-    wc.SetWindowSize(800, 600);
-    wc.SetWindowResizeable(false);
-    wc.SetWindowFPS(60);
-    wc.SetWindowBackgroundColor(BLACK);
     wc.Register();
 
     txTitle.SetText(text.data());

@@ -22,4 +22,4 @@ resources/img
 resources/font
 
 # raylib local library header
-lib/raylib/include/*.h
+HLITE/lib/raylib/include/*.h

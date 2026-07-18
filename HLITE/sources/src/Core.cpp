@@ -2,7 +2,6 @@
 
 #include <cstdio>
 
-int windowFps = 60;
 Color windowBkgCol = RAYWHITE;
 
 namespace HLITE
@@ -12,23 +11,28 @@ namespace HLITE
         // ===========================
         // WINDOW CORE
         // ===========================
-
-        void Window::SetWindowSize(int WindowWidth, int WindowHeight)
+    
+        void Window::SetWindowSize(Vector2& windowSize)
         {
-            windowWidth = WindowWidth;
-            windowHeight = WindowHeight;
+            windowWidth = windowSize.x;
+            windowHeight = windowSize.y;
         }
-        void Window::SetWindowTitle(const char *WindowTitle) { windowTitle = const_cast<char*>(WindowTitle); }
+        void Window::SetWindowTitle(const char *windowTitle) { this->windowTitle = windowTitle; }
         void Window::SetWindowResizeable(bool resizeable) { canResizeable = resizeable; }
-        void Window::SetWindowFPS(int WindowFps) { windowFps = WindowFps; }
-        void Window::SetWindowBackgroundColor(Color BackgroundColor) { windowBkgCol = BackgroundColor; }
-        void Window::Register()
+        void Window::SetWindowFPS(int windowFps) { fps = windowFps; }
+        void Window::SetWindowBackgroundColor(Color& backgroundColor) { windowBkgCol = backgroundColor; }
+        int Window::GetWindowWidth() const { return windowWidth; }
+        int Window::GetWindowHeight() const { return windowHeight; }
+        const char *Window::GetWindowTitle() const { return windowTitle; }
+        void Window::Register() const
         {
             if (windowWidth != 0 && windowHeight != 0 && windowTitle != nullptr)
             {
                 std::printf("[HLITE] GUI window active!\n");
                 if (canResizeable) SetConfigFlags(FLAG_WINDOW_RESIZABLE);
                 InitWindow(windowWidth, windowHeight, windowTitle);
+                windowBkgCol = backgroundColor;
+                SetTargetFPS(fps);
             }
             else 
             {
@@ -44,9 +48,14 @@ namespace HLITE
         {
             WindowInit();
 
+            if (!IsWindowReady())
+            {
+                std::printf("Press any key to exit...\n");
+                std::getchar();
+            }
+            
             if (IsWindowReady())
             {
-                SetTargetFPS(windowFps);
                 while (!WindowShouldClose())
                 {
                     WindowUpdate();
@@ -56,12 +65,7 @@ namespace HLITE
                     EndDrawing();
                 }
                 WindowUnload();
-            }
-
-            if (!IsWindowReady())
-            {
-                std::printf("Press any key to exit...\n");
-                std::getchar();
+                CloseWindow();
             }
         }
     }

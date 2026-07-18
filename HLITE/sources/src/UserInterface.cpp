@@ -610,5 +610,14 @@ namespace HLITE
             if (mode == TextFieldMode::DEFAULT)
                 EndScissorMode();
         }
+
+        /*
+         * Primitive Virtual Message Box Class
+         */
+
+        void VMessageBox::SetTitle(const char *title){this->title = title;}
+        void VMessageBox::SetDescribe(const char *description){this->description = description;}
+        void VMessageBox::SetPosition(Vector2& position){this->position = position;}
+        
     }
 }
