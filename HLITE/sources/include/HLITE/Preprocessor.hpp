@@ -22,6 +22,21 @@
 #define GET_CENTER_ORIGIN_TEXTURE_X_FLOAT(texture) (texture.width / 2.0f)
 #define GET_CENTER_ORIGIN_TEXTURE_Y_FLOAT(texture) (texture.height / 2.0f)
 
+#define WINDOW_COLOR (Color{210, 210, 210, 210})
 #define NO_COLOR ((Color){0, 0, 0, 0})
 
 #define MAX_PARTICLES (3000)
+
+/*
+ * Virtual Message Box
+*/
+
+#define MB_BTN_OK (0x001UL)
+#define MB_BTN_CANCEL (0x002UL)
+#define MB_BTN_ABORT (0x003UL)
+#define MB_BTN_RETRY (0x004UL)
+#define MB_BTN_IGNORE (0x005UL)
+#define MB_BTN_YES (0x006UL)
+#define MB_BTN_NO (0x007UL)
+#define MB_BTN_CONTINUE (0x008UL)
+#define MB_BTN_TRY (0x009UL)

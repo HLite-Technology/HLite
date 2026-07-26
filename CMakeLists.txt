@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(exec_name "main") # Your main executable name.
-set(main_code "example/Graphics2D/InputForm/main.cpp") # Your main source code.
+set(main_code "example/Graphics2D/BasicWindow/main.cpp") # Your main source code.
 
 set(hlite_name_static "hlite")
 set(HLITE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/HLITE/sources")

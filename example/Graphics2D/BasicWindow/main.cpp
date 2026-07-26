@@ -3,9 +3,12 @@
 
 #include <string_view>
 
-constinit HLITE::CORE::Window wc(Vector2{800, 600},
-    "HLITE - Basic Window", DARKBLUE, false, 60);
-HLITE::UI::Label txTitle;
+using namespace HLITE;
+
+constinit CORE::Window wc(Vector2{800, 600},
+    "HLITE - Basic Window", WINDOW_COLOR, false, 60);
+
+UI::Label txTitle;
 
 void HLITEMain::Init()
 {
@@ -25,9 +28,6 @@ void HLITEMain::Init()
 
 void HLITEMain::Update(){}
 
-void HLITEMain::Render()
-{
-    txTitle.DrawWithOutline(1, 255);
-}
+void HLITEMain::Render(){ txTitle.DrawWithOutline(1, 255); }
 
 void HLITEMain::Unload(){}

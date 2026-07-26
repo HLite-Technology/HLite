@@ -4,19 +4,21 @@
 #include <array>
 #include <format>
 
-constinit HLITE::CORE::Window wc(Vector2{400, 300},
-    "HLITE - Input Form", {210, 210, 210, 210}, false, 60);
+using namespace HLITE;
 
-HLITE::UI::Label txTitle = "HLITE FORM";
-HLITE::UI::Label txPrompName = "Name";
-HLITE::UI::Label txPrompAge = "Age";
+constinit CORE::Window wc(Vector2{400, 300},
+    "HLITE - Input Form", WINDOW_COLOR, false, 60);
 
-HLITE::UI::TextField usernameField("Enter name here...", 19, 15, true);
-HLITE::UI::TextField ageField("Enter age here...", 19, 15, true);
-HLITE::UI::TextArea resultArea("Result output...", 100, 15, false);
+UI::Label txTitle = "HLITE FORM";
+UI::Label txPrompName = "Name";
+UI::Label txPrompAge = "Age";
 
-HLITE::UI::Button submitBtn({"submit", {0.0f, 0.0f}, 20, BLACK, WHITE});
-HLITE::UI::Button clearBtn({"clear", {0.0f, 0.0f}, 21, BLACK, WHITE});
+UI::TextField usernameField("Enter name here...", 19, 15, true);
+UI::TextField ageField("Enter age here...", 19, 15, true);
+UI::TextArea resultArea("Result output...", 100, 15, false);
+
+UI::Button submitBtn({"submit", {0.0f, 0.0f}, 20, BLACK, WHITE});
+UI::Button clearBtn({"clear", {0.0f, 0.0f}, 21, BLACK, WHITE});
 
 void HLITEMain::Init()
 {
@@ -48,7 +50,7 @@ void HLITEMain::Init()
         .height = 25.0f
     });
     usernameField.SetBoxPadding(5);
-    usernameField.SetFieldMode(HLITE::UI::TextFieldMode::STATIC);
+    usernameField.SetFieldMode(UI::TextFieldMode::STATIC);
     usernameField.SetTextColor(BLACK);
     usernameField.SetBoxColor(WHITE, DARKGRAY, LIME);
 
@@ -59,7 +61,7 @@ void HLITEMain::Init()
         .height = 25.0f
     });
     ageField.SetBoxPadding(5);
-    ageField.SetFieldMode(HLITE::UI::TextFieldMode::STATIC);
+    ageField.SetFieldMode(UI::TextFieldMode::STATIC);
     ageField.SetTextColor(BLACK);
     ageField.SetBoxColor(WHITE, DARKGRAY, LIME);
 
@@ -70,7 +72,7 @@ void HLITEMain::Init()
         .height = 50.0f
     });
     resultArea.SetBoxPadding(5);
-    resultArea.SetFieldMode(HLITE::UI::TextFieldMode::DEFAULT);
+    resultArea.SetFieldMode(UI::TextFieldMode::DEFAULT);
     resultArea.SetTextColor(BLACK);
     resultArea.SetBoxColor(WHITE, DARKGRAY, LIME);
 
@@ -124,7 +126,4 @@ void HLITEMain::Render()
     clearBtn.Draw();
 }
 
-void HLITEMain::Unload()
-{
-    
-}
+void HLITEMain::Unload(){}
