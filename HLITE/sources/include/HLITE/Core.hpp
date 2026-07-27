@@ -85,7 +85,7 @@ namespace HLITE
         // App running class.
         namespace APP
         {
-            // Running window (Dont use it, if you using HLite Framework!).
+            /// @attention Dont use it!
             /// @brief Runs the application using the supplied lifecycle callbacks.
             /// @param WindowInit The callback invoked during initialization.
             /// @param WindowUpdate The callback invoked during each update cycle.

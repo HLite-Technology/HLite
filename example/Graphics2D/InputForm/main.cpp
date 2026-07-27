@@ -1,5 +1,5 @@
-#include "HLITE/Core.hpp"
-#include "HLITE/UserInterface.hpp"
+#include <HLITE/Core.hpp>
+#include <HLITE/UserInterface.hpp>
 
 #include <array>
 #include <format>

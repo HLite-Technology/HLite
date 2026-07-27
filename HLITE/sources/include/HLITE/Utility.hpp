@@ -6,25 +6,42 @@ namespace HLITE
 {
     namespace UTIL
     {
-        // Key combine support (Todo...).
-        namespace Key
+        /// @brief Stateful helper for detecting key combinations without conflicting between calls.
+        class CombineKey
         {
-            // Combination of 2 keys that are pressed (Todo...).
-            /// @brief Checks whether two keys are combined within the allowed delay.
-            /// @param key1 The state of the first key.
-            /// @param key2 The state of the second key.
-            /// @param maxDelay The maximum allowed interval between key presses.
-            /// @return `true` if the key combination is detected; otherwise, `false`.
-            bool isCombine_2Key(bool key1, bool key2, float maxDelay);
-            // Combination of 3 keys that are pressed (Todo....).
-            /// @brief Checks whether three keys are combined within the allowed delay.
-            /// @param key1 The state of the first key.
-            /// @param key2 The state of the second key.
-            /// @param key3 The state of the third key.
-            /// @param maxDelay The maximum allowed interval between key presses.
-            /// @return `true` if the key combination is detected; otherwise, `false`.
-            bool isCombine_3Key(bool key1, bool key2, bool key3, float maxDelay);
-        }
+        public:
+            /// @brief Creates a key-combination detector.
+            /// @param maxDelay Retained for source compatibility; key combinations are detected immediately.
+            explicit CombineKey(float maxDelay = 0.50f);
+
+            /// @brief Retained for source compatibility; key combinations no longer use a delay.
+            /// @param maxDelay Ignored.
+            void SetMaxDelay(float maxDelay);
+
+            /// @brief Checks whether two keys are held at the same time.
+            /// @param key1 The current held state of the first key.
+            /// @param key2 The current held state of the second key.
+            /// @param customDelay Retained for source compatibility and ignored.
+            /// @return `true` once when both keys become held; `false` until one is released.
+            bool Check2(bool key1, bool key2, float customDelay = -1.0f);
+
+            /// @brief Checks whether three keys are held at the same time.
+            /// @param key1 The current held state of the first key.
+            /// @param key2 The current held state of the second key.
+            /// @param key3 The current held state of the third key.
+            /// @param customDelay Retained for source compatibility and ignored.
+            /// @return `true` once when all keys become held; `false` until one is released.
+            bool Check3(bool key1, bool key2, bool key3, float customDelay = -1.0f);
+            
+            /// @brief Resets the internal state so a new combination can start.
+            void Reset();
+        private:
+            bool combo2Active;
+            bool combo3Active;
+            bool prevKey1;
+            bool prevKey2;
+            bool prevKey3;
+        };
 
         /// @brief Delay timer support.
         class Delay

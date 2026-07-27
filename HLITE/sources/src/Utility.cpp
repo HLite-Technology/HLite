@@ -10,69 +10,50 @@ namespace HLITE
         // KEY COMBINE SUPPORT
         // ===================
 
-        namespace Key
+        CombineKey::CombineKey(float maxDelay)
+            : combo2Active(false), combo3Active(false), prevKey1(false), prevKey2(false), prevKey3(false)
+        { (void)maxDelay; }
+
+        void CombineKey::SetMaxDelay(float maxDelay)
+        { (void)maxDelay; }
+
+        bool CombineKey::Check2(bool key1, bool key2, float customDelay)
         {
-            bool isCombine_2Key(bool key1, bool key2, float maxDelay)
-            {
-                bool combine2KeyHnd = false;
-                double key1Time = 0.0;
-                double currentTime = GetTime();
-            
-                if (key1) 
-                {
-                    combine2KeyHnd = true;
-                    key1Time = currentTime;
-                }
-                if (combine2KeyHnd && key2 && (currentTime - key1Time <= maxDelay)) 
-                {
-                    combine2KeyHnd = false;
-                    return true; 
-                }
-                if (combine2KeyHnd && (currentTime - key1Time > maxDelay)) combine2KeyHnd = false;
-                return false;
-            }
+            (void)customDelay;
+            const bool key1Pressed = key1 && !prevKey1;
+            const bool key2Pressed = key2 && !prevKey2;
+            const bool combinationHeld = key1 && key2;
+            const bool triggered = combinationHeld && !combo2Active && (key1Pressed || key2Pressed);
 
-            bool isCombine_3Key(bool key1, bool key2, bool key3, float maxDelay)
-            {
-                int comboStage = 0;    
-                double lastKeyTime = 0.0;
-                double currentTime = GetTime();
+            combo2Active = combinationHeld;
+            prevKey1 = key1;
+            prevKey2 = key2;
+            return triggered;
+        }
 
-                if (comboStage == 0 && key1) 
-                {
-                    comboStage = 1;
-                    lastKeyTime = currentTime;
-                    return false;
-                }
-                if (comboStage == 1) 
-                {
-                    if (currentTime - lastKeyTime > maxDelay) 
-                    {
-                        comboStage = 0; 
-                        return false;
-                    }
-                    if (key2) 
-                    {
-                        comboStage = 2;
-                        lastKeyTime = currentTime;
-                        return false;
-                    }
-                }
-                if (comboStage == 2) 
-                {
-                    if (currentTime - lastKeyTime > maxDelay) 
-                    {
-                        comboStage = 0;
-                        return false;
-                    }
-                    if (key3) 
-                    {
-                        comboStage = 0; 
-                        return true;    
-                    }
-                }
-                return false;
-            }
+        bool CombineKey::Check3(bool key1, bool key2, bool key3, float customDelay)
+        {
+            (void)customDelay;
+            const bool key1Pressed = key1 && !prevKey1;
+            const bool key2Pressed = key2 && !prevKey2;
+            const bool key3Pressed = key3 && !prevKey3;
+            const bool combinationHeld = key1 && key2 && key3;
+            const bool triggered = combinationHeld && !combo3Active && (key1Pressed || key2Pressed || key3Pressed);
+
+            combo3Active = combinationHeld;
+            prevKey1 = key1;
+            prevKey2 = key2;
+            prevKey3 = key3;
+            return triggered;
+        }
+        
+        void CombineKey::Reset()
+        {
+            combo2Active = false;
+            combo3Active = false;
+            prevKey1 = false;
+            prevKey2 = false;
+            prevKey3 = false;
         }
 
         // =======================
