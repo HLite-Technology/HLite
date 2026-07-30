@@ -216,6 +216,8 @@ namespace HLITE
 
             /// @brief Render button.
             virtual void Draw();
+            /// @brief Render button with rounded.
+            virtual void DrawWithRounded(float roundess);
         private:
             Label text;
             Vector2 position;
@@ -497,8 +499,8 @@ namespace HLITE
             /// @param description The message box description.
             /// @param position The message box position.
             /// @param btnType The button configuration mode.
-            /// @param mode The message box display mode.
-            explicit VMessageBox(const char *title, const char *description, const Vector2& position,  const VMSBoxMod& btnType, const VMSBoxMod& mode);
+            /// @param mode To change the icon type.
+            explicit VMessageBox(const char *title, const char *description, const Vector2& position,  const VMSBoxMod& btnType, const VMSBoxMod& icon);
 
             /// @brief Set the title of the virtual message box.
             /// @param title The title of the virtual message box uses `const char*`.
@@ -509,6 +511,12 @@ namespace HLITE
             /// @brief Set the position of the virtual message box.
             /// @param position The position of the virtual message box uses `Vector2`.
             void SetPosition(const Vector2& position);
+            /// @brief To set the button type for the virtual message box.
+            /// @param btnType 
+            void SetButtonType(const VMSBoxMod& btnType);
+            /// @brief To change the virtual message box icon type.
+            /// @param icon To change the icon virtual message box type using `VMSBoxMod`.
+            void SetIconType(const VMSBoxMod& icon);
             
             /// @brief Get the title text virtual message box.
             /// @return `const char*` for string title.
@@ -519,6 +527,12 @@ namespace HLITE
             /// @brief Get the position of the virtual message box.
             /// @return `Vector2` data type for position.
             Vector2 GetPosition(); 
+            /// @brief To obtain the dimensions of the virtual message box rectangle
+            /// @return Get `x`, `y`, `width`, and `height` using `Rectangle`.
+            Rectangle GetRect();
+            /// @brief To check whether the virtual message box appears.
+            /// @return If it appears `true`, otherwise `false` as a `bool`.
+            bool IsMBXApear();
 
             /// @brief To trigger the virtual messagebox spawn event.
             void Appear();

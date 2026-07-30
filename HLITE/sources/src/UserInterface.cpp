@@ -302,6 +302,108 @@ namespace HLITE
                 text.GetSize(), text.GetColor()
             );
         }
+
+        void Button::DrawWithRounded(float roundess)
+        {
+            int mainPosY = 5;
+            int mainPosX = 5;
+            int mainWidthX = 10;
+            int mainHeightY = 5;
+        
+            rect = (Rectangle)
+            {
+                .x = position.x - mainPosX,
+                .y = position.y - mainPosY,
+                .width = static_cast<float>(GET_DEFAULT_TEXT_WIDTH(text.GetText().data(), text.GetSize()) + mainWidthX),
+                .height = static_cast<float>(GET_DEFAULT_TEXT_HEIGHT(text.GetText().data(), text.GetSize()) + mainHeightY)
+            };
+
+            if (!isHover)
+            {
+                // Background button
+                DrawRectangleRounded({rect.x - 1,
+                    rect.y- 1,
+                    rect.width + 2,
+                    rect.height + 2},
+                    roundess, 0, 
+                    outlineColorBtn);
+            
+                // Foreground button
+                DrawRectangleRounded({rect.x,
+                    rect.y,
+                    rect.width,
+                    rect.height},
+                    roundess, 0, 
+                    mainColorBtn);
+            }
+            else
+            {
+                if (!isClicked)
+                {
+                    // Background button
+                    DrawRectangleRounded({rect.x - 1,
+                                          rect.y- 1,
+                                          rect.width + 2,
+                                          rect.height + 2},
+                                          roundess, 0,
+                                              (Color){.r = static_cast<unsigned char>(outlineColorBtn.r + 15),
+                                                      .g = static_cast<unsigned char>(outlineColorBtn.g + 15),
+                                                      .b = static_cast<unsigned char>(outlineColorBtn.b + 15),
+                                                      .a = static_cast<unsigned char>(outlineColorBtn.a)});
+                
+                    // Foreground button
+                    DrawRectangleRounded({rect.x,
+                                          rect.y,
+                                          rect.width,
+                                          rect.height},
+                                          roundess, 0, 
+                                          (Color){.r = static_cast<unsigned char>(mainColorBtn.r + 10),
+                                                  .g = static_cast<unsigned char>(mainColorBtn.g + 10),
+                                                  .b = static_cast<unsigned char>(mainColorBtn.b + 10),
+                                                  .a = static_cast<unsigned char>(mainColorBtn.a)});
+                }
+                else
+                {
+                    // Background button
+                    DrawRectangleRounded({rect.x - 2,
+                                          rect.y- 2,
+                                          rect.width + 2,
+                                          rect.height + 2},
+                                          roundess, 0,
+                                          (Color){.r = static_cast<unsigned char>(outlineColorBtn.r + 15),
+                                                  .g = static_cast<unsigned char>(outlineColorBtn.g + 15),
+                                                  .b = static_cast<unsigned char>(outlineColorBtn.b + 15),
+                                                  .a = static_cast<unsigned char>(outlineColorBtn.a)});
+                
+                    // Foreground button
+                    DrawRectangleRounded({rect.x,
+                                          rect.y,
+                                          rect.width,
+                                          rect.height},
+                                          roundess, 0,
+                                          (Color){.r = static_cast<unsigned char>(outlineColorBtn.r + 15),
+                                                  .g = static_cast<unsigned char>(outlineColorBtn.g + 15),
+                                                  .b = static_cast<unsigned char>(outlineColorBtn.b + 15),
+                                                  .a = static_cast<unsigned char>(outlineColorBtn.a)});
+                }
+            }
+
+            float textPosWidth = rect.x + (rect.width - GET_DEFAULT_TEXT_WIDTH(text.GetText().data(), text.GetSize())) / 2;
+            float textPosHeight = rect.y + (rect.height - GET_DEFAULT_TEXT_HEIGHT(text.GetText().data(), text.GetSize())) / 2;
+
+            DrawText(text.GetText().data(), textPosWidth - 1, textPosHeight - 1, text.GetSize(), text.GetOutlineColor());
+            DrawText(text.GetText().data(), textPosWidth + 1, textPosHeight - 1, text.GetSize(), text.GetOutlineColor());
+            DrawText(text.GetText().data(), textPosWidth - 1, textPosHeight + 1, text.GetSize(), text.GetOutlineColor());
+            DrawText(text.GetText().data(), textPosWidth + 1, textPosHeight + 1, text.GetSize(), text.GetOutlineColor());
+
+            // Foreground text.
+            DrawText(
+                text.GetText().data(), 
+                textPosWidth,
+                textPosHeight,
+                text.GetSize(), text.GetColor()
+            );
+        }
         
         /*
          * Primitive Text Field Class
@@ -825,8 +927,8 @@ namespace HLITE
             btnThree.SetOutlineColorBtn(DARKGRAY);
         }
 
-        VMessageBox::VMessageBox(const char *title, const char *description, const Vector2& position,  const VMSBoxMod& btnType, const VMSBoxMod& mode)
-        : title(title), description(description), position(position), btnType(btnType), mode(mode)
+        VMessageBox::VMessageBox(const char *title, const char *description, const Vector2& position,  const VMSBoxMod& btnType, const VMSBoxMod& icon)
+        : title(title), description(description), position(position), btnType(btnType), mode(icon)
         {
             btnOne.SetPosition({vmbRect.x, vmbRect.y});
             btnTwo.SetPosition({vmbRect.x, vmbRect.y});
@@ -990,9 +1092,13 @@ namespace HLITE
         void VMessageBox::SetTitle(const char *title){this->title = title;}
         void VMessageBox::SetDescribe(const char *description){this->description = description;}
         void VMessageBox::SetPosition(const Vector2& position){this->position = position;}
+        void VMessageBox::SetButtonType(const VMSBoxMod& btnType){this->btnType = btnType;}
+        void VMessageBox::SetIconType(const VMSBoxMod& icon){this->mode = icon;}
         const char *VMessageBox::GetTitle(){return title;}
         const char *VMessageBox::GetDescribe(){return description;}
         Vector2 VMessageBox::GetPosition(){return position;}
+        Rectangle VMessageBox::GetRect(){return vmbRect;}
+        bool VMessageBox::IsMBXApear(){return isAppear;}
         void VMessageBox::Appear(){isAppear = true;}
         std::size_t VMessageBox::Update()
         { 

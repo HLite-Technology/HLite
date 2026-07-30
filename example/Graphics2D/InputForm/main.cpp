@@ -20,6 +20,12 @@ UI::TextArea resultArea("Result output...", 100, 15, false);
 UI::Button submitBtn({"submit", {0.0f, 0.0f}, 20, BLACK, WHITE});
 UI::Button clearBtn({"clear", {0.0f, 0.0f}, 21, BLACK, WHITE});
 
+UI::VMessageBox failedMbx("Failed Form!",
+                          "The form data entered cannot be empty!", 
+                          {50.0f, 50.0f}, 
+                          UI::VMSBoxMod::MB_OK, 
+                          UI::VMSBoxMod::MB_ICONERROR);
+
 void HLITEMain::Init()
 {
     wc.Register();
@@ -90,22 +96,43 @@ void HLITEMain::Update()
     usernameField.Update();
     ageField.Update();
     resultArea.Update();
+    
+    failedMbx.Update();
 
     if (submitBtn.Update())
     {
-        std::array<char, 255> buffer;
+        if (!usernameField.GetText().empty() ||
+            !ageField.GetText().empty())
+        {
+            std::array<char, 255> buffer;
 
-        auto results = std::format_to(buffer.data(),
-                                      "My name is {}. I\'am {} years old.", 
-                                      usernameField.GetText(), 
-                                      ageField.GetText());
-        *results = '\0';
+            auto results = std::format_to(buffer.data(),
+                                          "My name is {}. I\'am {} years old.", 
+                                          usernameField.GetText(), 
+                                          ageField.GetText());
+            *results = '\0';
 
-        resultArea.SetText(buffer.data());
+            resultArea.SetText(buffer.data());
+        }
+        else
+        {
+            failedMbx.SetTitle("Failed Form!");
+            failedMbx.SetDescribe("The form data entered cannot be empty!");
+            failedMbx.SetIconType(UI::VMSBoxMod::MB_ICONERROR);
+            failedMbx.Appear();
+        }
     }
     
     if (clearBtn.Update())
     {
+        if (resultArea.GetText().empty())
+        {
+            failedMbx.SetTitle("Warning Form");
+            failedMbx.SetDescribe("The result field is indeed empty.");
+            failedMbx.SetIconType(UI::VMSBoxMod::MB_ICONWARNING);
+            failedMbx.Appear();
+        }
+
         if (!usernameField.GetText().empty()) usernameField.SetText("");
         if (!ageField.GetText().empty()) ageField.SetText("");
         if (!resultArea.GetText().empty()) resultArea.SetText("");
@@ -122,8 +149,11 @@ void HLITEMain::Render()
     ageField.Draw();
     resultArea.Draw();
 
-    submitBtn.Draw();
-    clearBtn.Draw();
+    submitBtn.DrawWithRounded(0.5f);
+    clearBtn.DrawWithRounded(0.5f);
+
+    if (failedMbx.IsMBXApear())
+        failedMbx.Draw();
 }
 
 void HLITEMain::Unload(){}
