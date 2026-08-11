@@ -16,6 +16,8 @@
 #define GET_CENTER_CUSTOM_TEXT_FONT_X_FLOAT(text, font, fontSize, spacing) ((GetScreenWidth() - MeasureTextEx(font, text, (float)(fontSize), spacing).x) / 2.0f)
 #define GET_CENTER_CUSTOM_TEXT_FONT_Y_FLOAT(text, font, fontSize, spacing) ((GetScreenHeight() - MeasureTextEx(font, text, (float)(fontSize), spacing).y) / 2.0f)
 
+#define GET_CENTER_POSITION_X(width) ((GetScreenWidth() - width) / 2.0f)
+#define GET_CENTER_POSITION_Y(high) ((GetScreenHeight() - high) / 2.0f)
 #define GET_CENTER_POSITION_TEXTURE ((Vector2){GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f})
 #define GET_CENTER_POSITION_TEXTURE_X_FLOAT (GetScreenWidth() / 2.0f)
 #define GET_CENTER_POSITION_TEXTURE_Y_FLOAT (GetScreenHeight() / 2.0f)

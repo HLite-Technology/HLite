@@ -11,7 +11,7 @@ set(hlite_name_static "hlite")
 set(HLITE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/HLITE/sources")
 set(RAYLIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/HLITE/lib/raylib")
 set(RAYLIB_INCLUDE_DIR "${RAYLIB_DIR}/include")
-set(RAYLIB_STATIC_LIB "${RAYLIB_DIR}/libraylib.a")
+set(RAYLIB_STATIC_LIB "${RAYLIB_DIR}/lib/libraylib.a")
 
 add_library(${hlite_name_static}
     STATIC

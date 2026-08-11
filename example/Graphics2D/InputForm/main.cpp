@@ -114,25 +114,11 @@ void HLITEMain::Update()
 
             resultArea.SetText(buffer.data());
         }
-        else
-        {
-            failedMbx.SetTitle("Failed Form!");
-            failedMbx.SetDescribe("The form data entered cannot be empty!");
-            failedMbx.SetIconType(UI::VMSBoxMod::MB_ICONERROR);
-            failedMbx.Appear();
-        }
+        else failedMbx.Appear();
     }
     
     if (clearBtn.Update())
     {
-        if (resultArea.GetText().empty())
-        {
-            failedMbx.SetTitle("Warning Form");
-            failedMbx.SetDescribe("The result field is indeed empty.");
-            failedMbx.SetIconType(UI::VMSBoxMod::MB_ICONWARNING);
-            failedMbx.Appear();
-        }
-
         if (!usernameField.GetText().empty()) usernameField.SetText("");
         if (!ageField.GetText().empty()) ageField.SetText("");
         if (!resultArea.GetText().empty()) resultArea.SetText("");

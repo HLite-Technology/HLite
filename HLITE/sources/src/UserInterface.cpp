@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <algorithm>
+#include <string>
 
 #define GET_DEFAULT_TEXT_WIDTH(text, fontSize) (MeasureTextEx(GetFontDefault(), text, (float)(fontSize), GET_DEFAULT_FONT_SPACING).x)
 #define GET_DEFAULT_TEXT_HEIGHT(text, fontSize) (MeasureTextEx(GetFontDefault(), text, (float)(fontSize), GET_DEFAULT_FONT_SPACING).y)
@@ -437,17 +438,93 @@ namespace HLITE
         std::size_t TextField::GetMaxLen() { return hndText.capacity(); }
         std::string TextField::GetText() { return hndText; }
 
+        void TextField::ClearSelection()
+        {
+            selectionStart = 0;
+            selectionEnd = 0;
+            selectionAnchor = 0;
+            hasSelection = false;
+            isSelectingText = false;
+        }
+
+        void TextField::SetSelection(int start, int end)
+        {
+            if (start < 0) start = 0;
+            if (end < 0) end = 0;
+            if (start > static_cast<int>(hndText.size())) start = static_cast<int>(hndText.size());
+            if (end > static_cast<int>(hndText.size())) end = static_cast<int>(hndText.size());
+
+            selectionStart = std::min(start, end);
+            selectionEnd = std::max(start, end);
+            hasSelection = selectionStart != selectionEnd;
+        }
+
+        int TextField::GetTextIndexAtPoint(float x) const
+        {
+            const int textStartX = static_cast<int>(textBox.x + boxPadding);
+            int relativeX = static_cast<int>(x - textStartX);
+            if (relativeX <= 0) return 0;
+
+            for (std::size_t i = 0; i < hndText.size(); ++i)
+            {
+                std::string prefix = hndText.substr(0, i + 1);
+                int prefixWidth = MeasureText(prefix.c_str(), textSize);
+                if (relativeX <= prefixWidth)
+                    return static_cast<int>(i + 1);
+            }
+
+            return static_cast<int>(hndText.size());
+        }
+
+        std::string TextField::GetSelectedText() const
+        {
+            if (!hasSelection) return "";
+
+            int start = std::min(selectionStart, selectionEnd);
+            int end = std::max(selectionStart, selectionEnd);
+            return hndText.substr(start, end - start);
+        }
+
         void TextField::Update()
         {
             if (!canEditable) return;
 
-            if (CheckCollisionPointRec(GetMousePosition(), textBox)) mouseOnText = true;
+            Vector2 mousePos = GetMousePosition();
+            if (CheckCollisionPointRec(mousePos, textBox)) mouseOnText = true;
             else mouseOnText = false;
+
+            const bool ctrlPressed = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
-                if (mouseOnText) isMouseFocusText = true;
-                else isMouseFocusText = false;
+                if (mouseOnText)
+                {
+                    isMouseFocusText = true;
+                    int clickedIndex = GetTextIndexAtPoint(mousePos.x);
+                    selectionAnchor = clickedIndex;
+
+                    if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
+                        SetSelection(selectionStart, clickedIndex);
+                    else
+                        SetSelection(clickedIndex, clickedIndex);
+
+                    isSelectingText = true;
+                }
+                else
+                {
+                    isMouseFocusText = false;
+                    ClearSelection();
+                }
+            }
+
+            if (isMouseFocusText && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && mouseOnText)
+            {
+                int dragIndex = GetTextIndexAtPoint(mousePos.x);
+                SetSelection(selectionAnchor, dragIndex);
+            }
+            else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+            {
+                isSelectingText = false;
             }
 
             if (isMouseFocusText)
@@ -455,25 +532,96 @@ namespace HLITE
                 if (IsKeyPressed(KEY_ENTER))
                     isMouseFocusText = false;
 
+                if (ctrlPressed && IsKeyPressed(KEY_A))
+                {
+                    SetSelection(0, static_cast<int>(hndText.size()));
+                }
+
+                if (ctrlPressed && IsKeyPressed(KEY_C) && hasSelection)
+                {
+                    SetClipboardText(GetSelectedText().c_str());
+                }
+
+                if ((ctrlPressed) && IsKeyPressed(KEY_V))
+                {
+                    const char *clipboardText = GetClipboardText();
+                    if (clipboardText != nullptr && clipboardText[0] != '\0')
+                    {
+                        std::string pastedText = clipboardText;
+                        if (hasSelection)
+                        {
+                            int start = std::min(selectionStart, selectionEnd);
+                            int end = std::max(selectionStart, selectionEnd);
+                            std::string updatedText = hndText.substr(0, start) + pastedText + hndText.substr(end);
+                            if (static_cast<int>(updatedText.size()) > maxLength)
+                                updatedText = updatedText.substr(0, maxLength);
+
+                            hndText = updatedText;
+                            selectionAnchor = start + static_cast<int>(pastedText.size());
+                            SetSelection(selectionAnchor, selectionAnchor);
+                        }
+                        else
+                        {
+                            for (char ch : pastedText)
+                            {
+                                if (hndText.length() >= maxLength) break;
+
+                                if ((ch >= 32) && (ch <= 125))
+                                {
+                                    if (mode == TextFieldMode::STATIC)
+                                    {
+                                        std::string nextText = hndText + ch;
+
+                                        int nextTextWidth = MeasureText(nextText.c_str(), textSize);
+                                        int cursorWidth = MeasureText("_", textSize);
+                                        int maxAllowedWidth = (int)textBox.width - (boxPadding * 2) - cursorWidth;
+
+                                        if (nextTextWidth < maxAllowedWidth)
+                                            hndText.push_back(ch);
+                                    }
+
+                                    if (mode == TextFieldMode::DEFAULT)
+                                        hndText.push_back(ch);
+                                }
+                            }
+                        }
+                    }
+                }
+
                 int key = GetCharPressed();
                 while (key > 0)
                 {
                     if ((key >= 32) && (key <= 125) && (hndText.length() < maxLength))
                     {
-                        if (mode == TextFieldMode::STATIC)
+                        if (hasSelection)
                         {
-                            std::string nextText = hndText + static_cast<char>(key);
+                            int start = std::min(selectionStart, selectionEnd);
+                            int end = std::max(selectionStart, selectionEnd);
+                            std::string updatedText = hndText.substr(0, start) + static_cast<char>(key) + hndText.substr(end);
+                            if (static_cast<int>(updatedText.size()) > maxLength)
+                                updatedText = updatedText.substr(0, maxLength);
 
-                            int nextTextWidth = MeasureText(nextText.c_str(), textSize);
-                            int cursorWidth = MeasureText("_", textSize);
-                            int maxAllowedWidth = (int)textBox.width - (boxPadding * 2) - cursorWidth;
+                            hndText = updatedText;
+                            selectionAnchor = start + 1;
+                            SetSelection(selectionAnchor, selectionAnchor);
+                        }
+                        else
+                        {
+                            if (mode == TextFieldMode::STATIC)
+                            {
+                                std::string nextText = hndText + static_cast<char>(key);
 
-                            if (nextTextWidth < maxAllowedWidth)
+                                int nextTextWidth = MeasureText(nextText.c_str(), textSize);
+                                int cursorWidth = MeasureText("_", textSize);
+                                int maxAllowedWidth = (int)textBox.width - (boxPadding * 2) - cursorWidth;
+
+                                if (nextTextWidth < maxAllowedWidth)
+                                    hndText.push_back(static_cast<char>(key));
+                            }
+
+                            if (mode == TextFieldMode::DEFAULT)
                                 hndText.push_back(static_cast<char>(key));
                         }
-
-                        if (mode == TextFieldMode::DEFAULT)
-                            hndText.push_back(static_cast<char>(key));
                     }
                 
                     key = GetCharPressed();
@@ -483,7 +631,15 @@ namespace HLITE
                 {
                     if (IsKeyPressed(KEY_BACKSPACE))
                     {
-                        if (!hndText.empty())
+                        if (hasSelection)
+                        {
+                            int start = std::min(selectionStart, selectionEnd);
+                            int end = std::max(selectionStart, selectionEnd);
+                            hndText = hndText.substr(0, start) + hndText.substr(end);
+                            selectionAnchor = start;
+                            SetSelection(selectionAnchor, selectionAnchor);
+                        }
+                        else if (!hndText.empty())
                             hndText.pop_back();
                         return;
                     }
@@ -492,7 +648,15 @@ namespace HLITE
 
                     if (delay.Update())
                     {
-                        if (!hndText.empty())
+                        if (hasSelection)
+                        {
+                            int start = std::min(selectionStart, selectionEnd);
+                            int end = std::max(selectionStart, selectionEnd);
+                            hndText = hndText.substr(0, start) + hndText.substr(end);
+                            selectionAnchor = start;
+                            SetSelection(selectionAnchor, selectionAnchor);
+                        }
+                        else if (!hndText.empty())
                             hndText.pop_back();
                     }
                 }
@@ -536,6 +700,25 @@ namespace HLITE
 
             if (hndText.empty())
                 DrawText(placeholders.data(), (int)textBox.x + boxPadding, (int)textBox.y + boxPadding, textSize, (Color){200, 200, 200, 155});
+
+            if (hasSelection)
+            {
+                int start = std::min(selectionStart, selectionEnd);
+                int end = std::max(selectionStart, selectionEnd);
+                int baseX = (int)textBox.x + boxPadding;
+                int baseY = (int)textBox.y + boxPadding;
+
+                for (int i = start; i < end; ++i)
+                {
+                    std::string prefix = hndText.substr(0, i);
+                    int charStartX = baseX + MeasureText(prefix.c_str(), textSize);
+                    std::string nextPrefix = hndText.substr(0, i + 1);
+                    int charEndX = baseX + MeasureText(nextPrefix.c_str(), textSize);
+                    int charWidth = std::max(1, charEndX - charStartX);
+
+                    DrawRectangleRec((Rectangle){(float)charStartX, (float)baseY, (float)charWidth, (float)textSize + 2}, (Color){180, 200, 255, 180});
+                }
+            }
             
             DrawText(hndText.data(), (int)textBox.x + boxPadding, (int)textBox.y + boxPadding, textSize, texCol);
 
@@ -567,16 +750,119 @@ namespace HLITE
         void TextArea::Update()
         {
             if (!canEditable) return;
-        
-            if (CheckCollisionPointRec(GetMousePosition(), textBox)) mouseOnText = true;
+
+            Vector2 mousePos = GetMousePosition();
+            if (CheckCollisionPointRec(mousePos, textBox)) mouseOnText = true;
             else mouseOnText = false;
-        
+
+            const bool ctrlPressed = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
+
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
-                if (mouseOnText) isMouseFocusText = true;
-                else isMouseFocusText = false;
+                if (mouseOnText)
+                {
+                    isMouseFocusText = true;
+
+                    int clickedIndex = static_cast<int>(hndText.size());
+                    int lineHeight = textSize + 2;
+                    int lineIndex = (textBox.height > 0) ? std::max(0, static_cast<int>((mousePos.y - (textBox.y + boxPadding)) / lineHeight)) : 0;
+
+                    int currentLine = 0;
+                    int lineStart = 0;
+                    for (std::size_t i = 0; i <= hndText.size(); ++i)
+                    {
+                        if (i == hndText.size() || hndText[i] == '\n')
+                        {
+                            if (currentLine == lineIndex)
+                            {
+                                std::string line = hndText.substr(lineStart, i - lineStart);
+                                int relativeX = static_cast<int>(mousePos.x - (textBox.x + boxPadding));
+                                if (relativeX <= 0) { clickedIndex = lineStart; }
+                                else
+                                {
+                                    for (std::size_t j = 0; j < line.size(); ++j)
+                                    {
+                                        std::string prefix = line.substr(0, j + 1);
+                                        int prefixWidth = MeasureText(prefix.c_str(), textSize);
+                                        if (relativeX <= prefixWidth)
+                                        {
+                                            clickedIndex = lineStart + static_cast<int>(j + 1);
+                                            break;
+                                        }
+                                    }
+                                    if (clickedIndex == static_cast<int>(hndText.size()))
+                                        clickedIndex = lineStart + static_cast<int>(line.size());
+                                }
+                                break;
+                            }
+
+                            currentLine++;
+                            lineStart = static_cast<int>(i + 1);
+                        }
+                    }
+
+                    selectionAnchor = clickedIndex;
+                    if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
+                        SetSelection(selectionStart, clickedIndex);
+                    else
+                        SetSelection(clickedIndex, clickedIndex);
+
+                    isSelectingText = true;
+                }
+                else
+                {
+                    isMouseFocusText = false;
+                    ClearSelection();
+                }
             }
-        
+
+            if (isMouseFocusText && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && mouseOnText)
+            {
+                int dragIndex = static_cast<int>(hndText.size());
+                int lineHeight = textSize + 2;
+                int lineIndex = (textBox.height > 0) ? std::max(0, static_cast<int>((mousePos.y - (textBox.y + boxPadding)) / lineHeight)) : 0;
+
+                int currentLine = 0;
+                int lineStart = 0;
+                for (std::size_t i = 0; i <= hndText.size(); ++i)
+                {
+                    if (i == hndText.size() || hndText[i] == '\n')
+                    {
+                        if (currentLine == lineIndex)
+                        {
+                            std::string line = hndText.substr(lineStart, i - lineStart);
+                            int relativeX = static_cast<int>(mousePos.x - (textBox.x + boxPadding));
+                            if (relativeX <= 0) { dragIndex = lineStart; }
+                            else
+                            {
+                                for (std::size_t j = 0; j < line.size(); ++j)
+                                {
+                                    std::string prefix = line.substr(0, j + 1);
+                                    int prefixWidth = MeasureText(prefix.c_str(), textSize);
+                                    if (relativeX <= prefixWidth)
+                                    {
+                                        dragIndex = lineStart + static_cast<int>(j + 1);
+                                        break;
+                                    }
+                                }
+                                if (dragIndex == static_cast<int>(hndText.size()))
+                                    dragIndex = lineStart + static_cast<int>(line.size());
+                            }
+                            break;
+                        }
+
+                        currentLine++;
+                        lineStart = static_cast<int>(i + 1);
+                    }
+                }
+
+                SetSelection(selectionAnchor, dragIndex);
+            }
+            else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+            {
+                isSelectingText = false;
+            }
+
             if (isMouseFocusText)
             {
                 if (IsKeyPressed(KEY_ENTER))
@@ -584,29 +870,101 @@ namespace HLITE
                     if (hndText.length() < maxLength)
                         hndText.push_back('\n');
                 }
+
+                if (ctrlPressed && IsKeyPressed(KEY_A))
+                {
+                    SetSelection(0, static_cast<int>(hndText.size()));
+                }
+
+                if (ctrlPressed && IsKeyPressed(KEY_C) && hasSelection)
+                {
+                    SetClipboardText(GetSelectedText().c_str());
+                }
+
+                if (ctrlPressed && IsKeyPressed(KEY_V))
+                {
+                    const char *clipboardText = GetClipboardText();
+                    if (clipboardText != nullptr && clipboardText[0] != '\0')
+                    {
+                        std::string pastedText = clipboardText;
+                        if (hasSelection)
+                        {
+                            int start = std::min(selectionStart, selectionEnd);
+                            int end = std::max(selectionStart, selectionEnd);
+                            std::string updatedText = hndText.substr(0, start) + pastedText + hndText.substr(end);
+                            if (static_cast<int>(updatedText.size()) > maxLength)
+                                updatedText = updatedText.substr(0, maxLength);
+
+                            hndText = updatedText;
+                            selectionAnchor = start + static_cast<int>(pastedText.size());
+                            SetSelection(selectionAnchor, selectionAnchor);
+                        }
+                        else
+                        {
+                            for (char ch : pastedText)
+                            {
+                                if (hndText.length() >= maxLength) break;
+
+                                if ((ch >= 32) && (ch <= 125))
+                                {
+                                    if (mode == TextFieldMode::STATIC)
+                                    {
+                                        std::size_t lastNewline = hndText.find_last_of('\n');
+                                        std::string lastLine = (lastNewline == std::string::npos) ? hndText : hndText.substr(lastNewline + 1);
+
+                                        std::string nextText = lastLine + ch;
+                                        int nextTextWidth = MeasureText(nextText.c_str(), textSize);
+                                        int cursorWidth = MeasureText("_", textSize);
+                                        int maxAllowedWidth = (int)textBox.width - (boxPadding * 2) - cursorWidth;
+
+                                        if (nextTextWidth < maxAllowedWidth)
+                                            hndText.push_back(ch);
+                                    }
+
+                                    if (mode == TextFieldMode::DEFAULT)
+                                        hndText.push_back(ch);
+                                }
+                            }
+                        }
+                    }
+                }
             
                 int key = GetCharPressed();
                 while (key > 0)
                 {
                     if ((key >= 32) && (key <= 125) && (hndText.length() < maxLength))
                     {
-                        if (mode == TextFieldMode::STATIC)
+                        if (hasSelection)
                         {
-                            // [PERUBAHAN]: Hanya ukur panjang teks pada baris terakhir untuk pembatasan input
-                            std::size_t lastNewline = hndText.find_last_of('\n');
-                            std::string lastLine = (lastNewline == std::string::npos) ? hndText : hndText.substr(lastNewline + 1);
+                            int start = std::min(selectionStart, selectionEnd);
+                            int end = std::max(selectionStart, selectionEnd);
+                            std::string updatedText = hndText.substr(0, start) + static_cast<char>(key) + hndText.substr(end);
+                            if (static_cast<int>(updatedText.size()) > maxLength)
+                                updatedText = updatedText.substr(0, maxLength);
 
-                            std::string nextText = lastLine + static_cast<char>(key);
-                            int nextTextWidth = MeasureText(nextText.c_str(), textSize);
-                            int cursorWidth = MeasureText("_", textSize);
-                            int maxAllowedWidth = (int)textBox.width - (boxPadding * 2) - cursorWidth;
+                            hndText = updatedText;
+                            selectionAnchor = start + 1;
+                            SetSelection(selectionAnchor, selectionAnchor);
+                        }
+                        else
+                        {
+                            if (mode == TextFieldMode::STATIC)
+                            {
+                                std::size_t lastNewline = hndText.find_last_of('\n');
+                                std::string lastLine = (lastNewline == std::string::npos) ? hndText : hndText.substr(lastNewline + 1);
+
+                                std::string nextText = lastLine + static_cast<char>(key);
+                                int nextTextWidth = MeasureText(nextText.c_str(), textSize);
+                                int cursorWidth = MeasureText("_", textSize);
+                                int maxAllowedWidth = (int)textBox.width - (boxPadding * 2) - cursorWidth;
+                            
+                                if (nextTextWidth < maxAllowedWidth)
+                                    hndText.push_back(static_cast<char>(key));
+                            }
                         
-                            if (nextTextWidth < maxAllowedWidth)
+                            if (mode == TextFieldMode::DEFAULT)
                                 hndText.push_back(static_cast<char>(key));
                         }
-                    
-                        if (mode == TextFieldMode::DEFAULT)
-                            hndText.push_back(static_cast<char>(key));
                     }
                 
                     key = GetCharPressed();
@@ -616,7 +974,15 @@ namespace HLITE
                 {
                     if (IsKeyPressed(KEY_BACKSPACE))
                     {
-                        if (!hndText.empty())
+                        if (hasSelection)
+                        {
+                            int start = std::min(selectionStart, selectionEnd);
+                            int end = std::max(selectionStart, selectionEnd);
+                            hndText = hndText.substr(0, start) + hndText.substr(end);
+                            selectionAnchor = start;
+                            SetSelection(selectionAnchor, selectionAnchor);
+                        }
+                        else if (!hndText.empty())
                             hndText.pop_back();
                         return;
                     }
@@ -625,7 +991,15 @@ namespace HLITE
                 
                     if (delay.Update())
                     {
-                        if (!hndText.empty())
+                        if (hasSelection)
+                        {
+                            int start = std::min(selectionStart, selectionEnd);
+                            int end = std::max(selectionStart, selectionEnd);
+                            hndText = hndText.substr(0, start) + hndText.substr(end);
+                            selectionAnchor = start;
+                            SetSelection(selectionAnchor, selectionAnchor);
+                        }
+                        else if (!hndText.empty())
                             hndText.pop_back();
                     }
                 }
@@ -669,6 +1043,45 @@ namespace HLITE
         
             if (hndText.empty())
                 DrawText(placeholders.data(), (int)textBox.x + boxPadding, (int)textBox.y + boxPadding, textSize, (Color){200, 200, 200, 155});
+
+            if (hasSelection)
+            {
+                int start = std::min(selectionStart, selectionEnd);
+                int end = std::max(selectionStart, selectionEnd);
+                int baseX = (int)textBox.x + boxPadding;
+                int baseY = (int)textBox.y + boxPadding;
+
+                for (int i = start; i < end; ++i)
+                {
+                    int line = 0;
+                    int lineStart = 0;
+                    bool found = false;
+
+                    for (std::size_t j = 0; j <= hndText.size(); ++j)
+                    {
+                        if (j == hndText.size() || hndText[j] == '\n')
+                        {
+                            if (i >= lineStart && i < static_cast<int>(j))
+                            {
+                                std::string lineText = hndText.substr(lineStart, j - lineStart);
+                                std::string prefix = lineText.substr(0, i - lineStart);
+                                int charStartX = baseX + MeasureText(prefix.c_str(), textSize);
+                                int charEndX = charStartX + std::max(1, MeasureText(lineText.substr(i - lineStart, 1).c_str(), textSize));
+                                int charY = baseY + (line * (textSize + 2));
+                                DrawRectangleRec((Rectangle){(float)charStartX, (float)charY, (float)(charEndX - charStartX), (float)textSize + 2}, (Color){180, 200, 255, 180});
+                                found = true;
+                                break;
+                            }
+
+                            line++;
+                            lineStart = static_cast<int>(j + 1);
+                        }
+                    }
+
+                    if (found)
+                        continue;
+                }
+            }
 
             DrawText(hndText.data(), (int)textBox.x + boxPadding, (int)textBox.y + boxPadding, textSize, texCol);
         
@@ -1260,6 +1673,180 @@ namespace HLITE
                 float scale = iconSize / static_cast<float>(iconToDraw->width);
                 DrawTextureEx(*iconToDraw, iconPos, 0.0f, scale, WHITE);
             }
+        }
+
+        /*
+         * SliderBar Class
+        */
+
+        SliderBar::SliderBar(float value) : value(value), isDragging(false){}
+        SliderBar::SliderBar(float value, SliderBarMode mode) : value(value), mode(mode){}
+        SliderBar::SliderBar(float value, SliderBarMode mode, Vector2 pos)
+        {this->value = value; this->mode = mode; this->rect = {pos.x, pos.y, 0.0f, 0.0f}; this->isDragging = false;}
+        SliderBar::SliderBar(float value, SliderBarMode mode, Vector2 pos, Vector2 size)
+        {this->value = value; this->mode = mode; this->rect = {pos.x, pos.y, size.x, size.y}; this->isDragging = false;}
+        SliderBar::SliderBar(float value, SliderBarMode mode, Vector2 pos, Vector2 size, Color rectCol)
+        {this->value = value; this->mode = mode; this->rect = {pos.x, pos.y, size.x, size.y}; this->rectCol = rectCol; this->isDragging = false;}
+        SliderBar::SliderBar(float value, SliderBarMode mode, Vector2 pos, Vector2 size, Color rectCol, Color sliderBarCol)
+        {this->value = value; this->mode = mode; this->rect = {pos.x, pos.y, size.x, size.y}; this->rectCol = rectCol; this->sliderBarCol = sliderBarCol; this->isDragging = false;}
+        SliderBar::SliderBar(float value, SliderBarMode mode, Vector2 pos, Vector2 size, float thickness, Color rectCol, Color sliderBarCol, Color outlineCol)
+        {this->value = value; this->mode = mode; this->rect = {pos.x, pos.y, size.x, size.y}; this->thickness = thickness; this->rectCol = rectCol; this->sliderBarCol = sliderBarCol; this->outlineCol = outlineCol; this->isDragging = false;}
+
+        void SliderBar::SetValue(float value){this->value = value;}
+        void SliderBar::SetMode(SliderBarMode mode){this->mode = mode;}
+        void SliderBar::SetPosition(Vector2 pos){this->rect.x = pos.x; this->rect.y = pos.y;}
+        void SliderBar::SetSize(Vector2 size){this->rect.width = size.x; this->rect.height = size.y;}
+        void SliderBar::SetThicknessLine(float thickness){this->thickness = thickness;}
+        void SliderBar::SetColorBar(Color color){this->rectCol = color;}
+        void SliderBar::SetSlidebarColor(Color color){this->sliderBarCol = color;}
+        void SliderBar::SetOutlineCol(Color color){this->outlineCol = color;}
+        float SliderBar::GetValue(){return value;}
+        Vector2 SliderBar::GetPosition(){return Vector2(rect.x, rect.y);}
+        Vector2 SliderBar::GetSize(){return Vector2(rect.width, rect.height);}
+        void SliderBar::Update()
+        {
+            if (mode == SliderBarMode::VERTICAL)
+            {
+                const Vector2 mousePos = GetMousePosition();
+                const float innerPadding = 3.0f;
+                const float barWidth = rect.width - 7.0f;
+                const float maxHeight = rect.height - (innerPadding * 2.0f);
+                const float minY = rect.y + innerPadding;
+                const float maxY = rect.y + rect.height - innerPadding;
+
+                if (maxHeight <= 0.0f)
+                {
+                    value = 0.0f;
+                    sliderBar = (Rectangle){.x = rect.x + innerPadding, .y = minY, .width = barWidth, .height = 0.0f};
+                    isDragging = false;
+                    return;
+                }
+
+                sliderBar = (Rectangle){.x = rect.x + innerPadding,
+                                        .y = minY,
+                                        .width = barWidth,
+                                        .height = value};
+
+                const bool hoveredTrack = CheckCollisionPointRec(mousePos, rect);
+                const bool hoveredFill = CheckCollisionPointRec(mousePos, sliderBar);
+
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && (hoveredTrack || hoveredFill))
+                    isDragging = true;
+
+                if (isDragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+                {
+                    float nextValue = mousePos.y - minY;
+                    if (nextValue < 0.0f) nextValue = 0.0f;
+                    if (nextValue > maxHeight) nextValue = maxHeight;
+                    value = nextValue;
+                }
+                else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+                {
+                    isDragging = false;
+                }
+
+                if (!isDragging)
+                {
+                    const float wheelMove = GetMouseWheelMove();
+                    if (hoveredTrack && wheelMove != 0.0f)
+                    {
+                        value += wheelMove * 10.0f;
+                        if (value < 0.0f) value = 0.0f;
+                        if (value > maxHeight) value = maxHeight;
+                    }
+                }
+
+                sliderBar = (Rectangle){.x = rect.x + innerPadding,
+                                        .y = minY,
+                                        .width = barWidth,
+                                        .height = value};
+            }
+            else
+            {
+                const Vector2 mousePos = GetMousePosition();
+                const float innerPadding = 3.0f;
+                const float barHeight = rect.height - 7.0f;
+                const float maxWidth = rect.width - (innerPadding * 2.0f);
+                const float minX = rect.x + innerPadding;
+                const float maxX = rect.x + rect.width - innerPadding;
+
+                if (maxWidth <= 0.0f)
+                {
+                    value = 0.0f;
+                    sliderBar = (Rectangle){.x = minX, .y = rect.y + innerPadding, .width = 0.0f, .height = barHeight};
+                    isDragging = false;
+                    return;
+                }
+
+                const bool hoveredTrack = CheckCollisionPointRec(mousePos, rect);
+                const bool hoveredFill = CheckCollisionPointRec(mousePos, sliderBar);
+
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && (hoveredTrack || hoveredFill))
+                    isDragging = true;
+
+                if (isDragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+                {
+                    float nextValue = mousePos.x - minX;
+                    if (nextValue < 0.0f) nextValue = 0.0f;
+                    if (nextValue > maxWidth) nextValue = maxWidth;
+                    value = nextValue;
+                }
+                else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+                {
+                    isDragging = false;
+                }
+
+                if (!isDragging)
+                {
+                    const float wheelMove = GetMouseWheelMove();
+                    if (hoveredTrack && wheelMove != 0.0f)
+                    {
+                        value += wheelMove * 10.0f;
+                        if (value < 0.0f) value = 0.0f;
+                        if (value > maxWidth) value = maxWidth;
+                    }
+                }
+
+                sliderBar = (Rectangle){.x = minX,
+                                        .y = rect.y + innerPadding,
+                                        .width = value,
+                                        .height = barHeight};
+            }
+        }
+        void SliderBar::Draw()
+        {
+            Rectangle rectLines;
+            if (mode == SliderBarMode::VERTICAL)
+            {
+                sliderBar = (Rectangle){.x = rect.x + 3.0f,
+                                        .y = rect.y + 3.0f,
+                                        .width = rect.width - 7.0f,
+                                        .height = (value < (rect.height - 4.0f)) ? value : rect.height - 4.0f};
+
+                rectLines = (Rectangle){.x = rect.x - 1.0f,
+                                                  .y = rect.y - 1.0f,
+                                                  .width = rect.width + 1.0f,
+                                                  .height = rect.height + 1.0f};
+            }
+            else
+            {
+                sliderBar = (Rectangle){.x = rect.x + 3.0f,
+                                        .y = rect.y + 3.0f,
+                                        .width = (value < (rect.width - 4.0f)) ? value : rect.width - 4.0f,
+                                        .height = rect.height - 7.0f};
+
+                rectLines = (Rectangle){.x = rect.x - 1.0f,
+                                                  .y = rect.y - 1.0f,
+                                                  .width = rect.width + 1.0f,
+                                                  .height = rect.height + 1.0f};
+            }
+
+            DrawRectangleRec(rect, rectCol);
+            DrawRectangleRec(sliderBar, sliderBarCol);
+
+            Vector2 mousePos = GetMousePosition();
+            if (CheckCollisionPointRec(mousePos, rect))
+                DrawRectangleLinesEx(rectLines, thickness, outlineCol);
         }
     }
 }

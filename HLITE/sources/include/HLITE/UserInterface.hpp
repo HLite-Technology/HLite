@@ -34,6 +34,13 @@ namespace HLITE
             MB_ICONINFORMATION
         } VMSBoxMod;
 
+        /// @brief Orientation mode for SliderBar.
+        typedef enum
+        {
+            VERTICAL,
+            HORIZONTAL
+        } SliderBarMode;
+
         // Primitive label (default).
         class Label
         {
@@ -332,6 +339,11 @@ namespace HLITE
                 offHoverBoxCol = offHoverBoxColor;
                 onHoverBoxCol = onHoverBoxColor;
                 delay.SetDuration(0.1f);
+                selectionStart = 0;
+                selectionEnd = 0;
+                selectionAnchor = 0;
+                hasSelection = false;
+                isSelectingText = false;
             }
 
             /// @brief Sets the current text field contents.
@@ -398,6 +410,16 @@ namespace HLITE
             Color offHoverBoxCol;
             Color onHoverBoxCol;
             HLITE::UTIL::Delay delay;
+            int selectionStart;
+            int selectionEnd;
+            int selectionAnchor;
+            bool hasSelection;
+            bool isSelectingText;
+
+            void ClearSelection();
+            void SetSelection(int start, int end);
+            int GetTextIndexAtPoint(float x) const;
+            std::string GetSelectedText() const;
         };
 
         /// @brief Primitive text area (default)
@@ -568,6 +590,68 @@ namespace HLITE
             static void EnsureIconsLoaded();
             /// @brief Private to close all virtual message box attributes.
             static void Close();
+        };
+
+        /// @brief Sliderbar useful classes such as volume or throttle controls.
+        class SliderBar
+        {
+        public:
+            SliderBar(){}
+            explicit SliderBar(float value);
+            explicit SliderBar(float value, SliderBarMode mode);
+            explicit SliderBar(float value, SliderBarMode mode,Vector2 pos);
+            explicit SliderBar(float value, SliderBarMode mode,Vector2 pos, Vector2 size);
+            explicit SliderBar(float value, SliderBarMode mode,Vector2 pos, Vector2 size, Color rectCol);
+            explicit SliderBar(float value, SliderBarMode mode,Vector2 pos, Vector2 size, Color rectCol, Color sliderBarCol);
+            explicit SliderBar(float value, SliderBarMode mode,Vector2 pos, Vector2 size, float thickness, Color rectCol, Color sliderBarCol, Color outlineCol);
+
+            /// @brief To set the value of the sliderbar.
+            /// @param value Value using `float`.
+            void SetValue(float value);
+            /// @brief To set orientation of the sliderbar.
+            /// @param mode set mode using `SliderBarMode`.
+            void SetMode(SliderBarMode mode);
+            /// @brief To set the position of the sliderbar.
+            /// @param pos Position using `Vector2`.
+            void SetPosition(Vector2 pos);
+            /// @brief To set the size of the sliderbar.
+            /// @param size Size using `Vector2`.
+            void SetSize(Vector2 size);
+            /// @brief To set the thickness line of the sliderbar.
+            /// @param thickness Thickness using `float`.
+            void SetThicknessLine(float thickness);
+            /// @brief To set the color background of the sliderbar.
+            /// @param color Color using `Color`.
+            void SetColorBar(Color color);
+            /// @brief To set the color sliderbar..
+            /// @param color Color using `Color`.
+            void SetSlidebarColor(Color color);
+            /// @brief To set the Color outline of the sliderbar.
+            /// @param color Color using `Color`.
+            void SetOutlineCol(Color color);
+            /// @brief To return the value of the sliderBar.
+            /// @return A `float` value ranging from `0.0f` to `N`.
+            float GetValue();
+            /// @brief To obtain the position of the slider bar.
+            /// @return The slider bar position is a `Vector2`.
+            Vector2 GetPosition();
+            /// @brief To obtain the size of the slider bar.
+            /// @return The slider bar size is a `Vector2`.
+            Vector2 GetSize();
+            /// @brief Update the slider bar logic.
+            virtual void Update();
+            /// @brief Render the slider bar to the screen.
+            virtual void Draw();
+        protected:
+            float value;
+            SliderBarMode mode;
+            Rectangle rect;
+            Rectangle sliderBar;
+            float thickness;
+            bool isDragging;
+            Color rectCol;
+            Color sliderBarCol;
+            Color outlineCol;
         };
     }
 }
