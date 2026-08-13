@@ -32,8 +32,8 @@ namespace HLITE
             /// @param backgroundColor The initial window background color.
             /// @param windowResizeable Whether the window can be resized.
             explicit constexpr Window(const Vector2 sizeWindow, const char *windowTitle, const Color backgroundColor, const bool windowResizeable) : 
-            windowWidth(static_cast<int>(sizeWindow.x)), windowHeight(static_cast<int>(sizeWindow.y)), 
-            windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable) {}
+                           windowWidth(static_cast<int>(sizeWindow.x)), windowHeight(static_cast<int>(sizeWindow.y)), 
+                           windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable) {}
             /// @brief Creates a window configuration with the specified display settings and frame rate.
             /// @param sizeWindow The initial window dimensions.
             /// @param windowTitle The title displayed in the window title bar.
@@ -41,8 +41,18 @@ namespace HLITE
             /// @param windowResizeable Whether the window can be resized.
             /// @param fps The target window frame rate.
             explicit constexpr Window(const Vector2 sizeWindow, const char *windowTitle, const Color backgroundColor, const bool windowResizeable, const int fps)
-            : windowWidth(static_cast<int>(sizeWindow.x)), windowHeight(static_cast<int>(sizeWindow.y)),
-            windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable), fps(fps) {}
+                           : windowWidth(static_cast<int>(sizeWindow.x)), windowHeight(static_cast<int>(sizeWindow.y)),
+                           windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable), fps(fps), showIcon(true) {}
+            /// @brief Creates a window configuration with the specified display settings and frame rate, display hlite icon.
+            /// @param sizeWindow The initial window dimensions.
+            /// @param windowTitle The title displayed in the window title bar.
+            /// @param backgroundColor The initial window background color.
+            /// @param windowResizeable Whether the window can be resized.
+            /// @param fps The target window frame rate.
+            /// @param showHliteIcon To display the HLITE icon when first opened.
+            explicit constexpr Window(const Vector2 sizeWindow, const char *windowTitle, const Color backgroundColor, const bool windowResizeable, const int fps, const bool showHliteIcon)
+                           : windowWidth(static_cast<int>(sizeWindow.x)), windowHeight(static_cast<int>(sizeWindow.y)),
+                           windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable), fps(fps), showIcon(showHliteIcon) {}
 
             /// @brief Sets the window dimensions.
             /// @param windowSize The new window dimensions.
@@ -59,6 +69,9 @@ namespace HLITE
             /// @brief Sets the window background color.
             /// @param backgroundColor The new background color.
             void SetWindowBackgroundColor(Color& backgroundColor);
+            /// @brief To activate the HLITE framework intro.
+            /// @param status Uses the `bool` data type.
+            void SetHLITEIntro(bool status);
 
             /// @brief Returns the configured window width.
             /// @return The window width in pixels.
@@ -79,7 +92,8 @@ namespace HLITE
             const char *windowTitle = nullptr;
             Color backgroundColor = WHITE;
             bool canResizeable = false;
-            int fps;
+            int fps = 60;
+            bool showIcon = true;
         };
 
         // App running class.

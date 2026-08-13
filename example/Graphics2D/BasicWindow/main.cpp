@@ -7,7 +7,7 @@
 
 using namespace HLITE;
 
-constinit CORE::Window wc(Vector2{800, 600},
+constinit CORE::Window wc(Vector2{800.0f, 600.0f},
     "HLITE - Basic Window", WINDOW_COLOR, false, 60);
 
 UI::Label txTitle;
@@ -20,7 +20,9 @@ UTIL::CombineKey combine(0.25f);
 
 void HLITEMain::Init()
 {
+    constexpr bool intro = true;
     constexpr std::string_view text = "HLite its Awesome!";
+    wc.SetHLITEIntro(intro);
     wc.Register();
 
     txTitle.SetText(text.data());
