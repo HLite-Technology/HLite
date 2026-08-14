@@ -8,6 +8,21 @@
 #define GET_DEFAULT_TEXT_WIDTH(text, fontSize) (MeasureTextEx(GetFontDefault(), text, (float)(fontSize), GET_DEFAULT_FONT_SPACING).x)
 #define GET_DEFAULT_TEXT_HEIGHT(text, fontSize) (MeasureTextEx(GetFontDefault(), text, (float)(fontSize), GET_DEFAULT_FONT_SPACING).y)
 
+static bool IsTouchInsideRect(const Rectangle& rect, Vector2* touchPosOut = nullptr)
+{
+    for (int i = 0; i < GetTouchPointCount(); ++i)
+    {
+        Vector2 touchPos = GetTouchPosition(i);
+        if (CheckCollisionPointRec(touchPos, rect))
+        {
+            if (touchPosOut != nullptr)
+                *touchPosOut = touchPos;
+            return true;
+        }
+    }
+    return false;
+}
+
 namespace HLITE
 {
     namespace UI
@@ -547,17 +562,27 @@ namespace HLITE
             if (!canEditable) return;
 
             Vector2 mousePos = GetMousePosition();
-            if (CheckCollisionPointRec(mousePos, textBox)) mouseOnText = true;
-            else mouseOnText = false;
+            Vector2 touchPos = {0.0f, 0.0f};
+            const bool touchOnText = IsTouchInsideRect(textBox, &touchPos);
+            const bool hoverText = CheckCollisionPointRec(mousePos, textBox) || touchOnText;
+            mouseOnText = hoverText;
+
+            Vector2 activePos = touchOnText ? touchPos : mousePos;
+            const bool mousePressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+            const bool mouseHeld = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
+            const bool mouseReleased = IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
+            const bool touchPressed = touchOnText && GetTouchPointCount() > 0 && !isMouseFocusText;
+            const bool touchHeld = touchOnText && isMouseFocusText && GetTouchPointCount() > 0;
+            const bool touchReleased = !touchOnText && isMouseFocusText;
 
             const bool ctrlPressed = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            if (mousePressed || touchPressed)
             {
                 if (mouseOnText)
                 {
                     isMouseFocusText = true;
-                    int clickedIndex = GetTextIndexAtPoint(mousePos.x);
+                    int clickedIndex = GetTextIndexAtPoint(activePos.x);
                     selectionAnchor = clickedIndex;
 
                     if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
@@ -574,12 +599,12 @@ namespace HLITE
                 }
             }
 
-            if (isMouseFocusText && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && mouseOnText)
+            if (isMouseFocusText && (mouseHeld || touchHeld) && mouseOnText)
             {
-                int dragIndex = GetTextIndexAtPoint(mousePos.x);
+                int dragIndex = GetTextIndexAtPoint(activePos.x);
                 SetSelection(selectionAnchor, dragIndex);
             }
-            else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+            else if (mouseReleased || touchReleased)
             {
                 isSelectingText = false;
             }
@@ -809,12 +834,22 @@ namespace HLITE
             if (!canEditable) return;
 
             Vector2 mousePos = GetMousePosition();
-            if (CheckCollisionPointRec(mousePos, textBox)) mouseOnText = true;
-            else mouseOnText = false;
+            Vector2 touchPos = {0.0f, 0.0f};
+            const bool touchOnText = IsTouchInsideRect(textBox, &touchPos);
+            const bool hoverText = CheckCollisionPointRec(mousePos, textBox) || touchOnText;
+            mouseOnText = hoverText;
+
+            Vector2 activePos = touchOnText ? touchPos : mousePos;
+            const bool mousePressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+            const bool mouseHeld = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
+            const bool mouseReleased = IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
+            const bool touchPressed = touchOnText && GetTouchPointCount() > 0 && !isMouseFocusText;
+            const bool touchHeld = touchOnText && isMouseFocusText && GetTouchPointCount() > 0;
+            const bool touchReleased = !touchOnText && isMouseFocusText;
 
             const bool ctrlPressed = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            if (mousePressed || touchPressed)
             {
                 if (mouseOnText)
                 {
@@ -822,7 +857,7 @@ namespace HLITE
 
                     int clickedIndex = static_cast<int>(hndText.size());
                     int lineHeight = textSize + 2;
-                    int lineIndex = (textBox.height > 0) ? std::max(0, static_cast<int>((mousePos.y - (textBox.y + boxPadding)) / lineHeight)) : 0;
+                    int lineIndex = (textBox.height > 0) ? std::max(0, static_cast<int>((activePos.y - (textBox.y + boxPadding)) / lineHeight)) : 0;
 
                     int currentLine = 0;
                     int lineStart = 0;
@@ -833,7 +868,7 @@ namespace HLITE
                             if (currentLine == lineIndex)
                             {
                                 std::string line = hndText.substr(lineStart, i - lineStart);
-                                int relativeX = static_cast<int>(mousePos.x - (textBox.x + boxPadding));
+                                int relativeX = static_cast<int>(activePos.x - (textBox.x + boxPadding));
                                 if (relativeX <= 0) { clickedIndex = lineStart; }
                                 else
                                 {
@@ -873,11 +908,11 @@ namespace HLITE
                 }
             }
 
-            if (isMouseFocusText && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && mouseOnText)
+            if (isMouseFocusText && (mouseHeld || touchHeld) && mouseOnText)
             {
                 int dragIndex = static_cast<int>(hndText.size());
                 int lineHeight = textSize + 2;
-                int lineIndex = (textBox.height > 0) ? std::max(0, static_cast<int>((mousePos.y - (textBox.y + boxPadding)) / lineHeight)) : 0;
+                int lineIndex = (textBox.height > 0) ? std::max(0, static_cast<int>((activePos.y - (textBox.y + boxPadding)) / lineHeight)) : 0;
 
                 int currentLine = 0;
                 int lineStart = 0;
@@ -888,7 +923,7 @@ namespace HLITE
                         if (currentLine == lineIndex)
                         {
                             std::string line = hndText.substr(lineStart, i - lineStart);
-                            int relativeX = static_cast<int>(mousePos.x - (textBox.x + boxPadding));
+                            int relativeX = static_cast<int>(activePos.x - (textBox.x + boxPadding));
                             if (relativeX <= 0) { dragIndex = lineStart; }
                             else
                             {
@@ -915,7 +950,7 @@ namespace HLITE
 
                 SetSelection(selectionAnchor, dragIndex);
             }
-            else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+            else if (mouseReleased || touchReleased)
             {
                 isSelectingText = false;
             }
@@ -1594,6 +1629,9 @@ namespace HLITE
             if (mode == SliderBarMode::VERTICAL)
             {
                 const Vector2 mousePos = GetMousePosition();
+                Vector2 touchPos = {0.0f, 0.0f};
+                const bool isTouching = IsTouchInsideRect(rect, &touchPos);
+                
                 const float innerPadding = 3.0f;
                 const float barWidth = rect.width - 7.0f;
                 const float maxHeight = rect.height - (innerPadding * 2.0f);
@@ -1616,6 +1654,7 @@ namespace HLITE
                 const bool hoveredTrack = CheckCollisionPointRec(mousePos, rect);
                 const bool hoveredFill = CheckCollisionPointRec(mousePos, sliderBar);
 
+                // Mouse input handling
                 if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && (hoveredTrack || hoveredFill))
                     isDragging = true;
 
@@ -1627,6 +1666,24 @@ namespace HLITE
                     value = nextValue;
                 }
                 else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+                {
+                    isDragging = false;
+                }
+
+                // Touch input handling
+                if (!isDragging && isTouching)
+                {
+                    isDragging = true;
+                }
+
+                if (isDragging && isTouching)
+                {
+                    float nextValue = touchPos.y - minY;
+                    if (nextValue < 0.0f) nextValue = 0.0f;
+                    if (nextValue > maxHeight) nextValue = maxHeight;
+                    value = nextValue;
+                }
+                else if (isDragging && !isTouching && !IsMouseButtonDown(MOUSE_BUTTON_LEFT))
                 {
                     isDragging = false;
                 }
@@ -1650,6 +1707,9 @@ namespace HLITE
             else
             {
                 const Vector2 mousePos = GetMousePosition();
+                Vector2 touchPos = {0.0f, 0.0f};
+                const bool isTouching = IsTouchInsideRect(rect, &touchPos);
+                
                 const float innerPadding = 3.0f;
                 const float barHeight = rect.height - 7.0f;
                 const float maxWidth = rect.width - (innerPadding * 2.0f);
@@ -1667,6 +1727,7 @@ namespace HLITE
                 const bool hoveredTrack = CheckCollisionPointRec(mousePos, rect);
                 const bool hoveredFill = CheckCollisionPointRec(mousePos, sliderBar);
 
+                // Mouse input handling
                 if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && (hoveredTrack || hoveredFill))
                     isDragging = true;
 
@@ -1678,6 +1739,24 @@ namespace HLITE
                     value = nextValue;
                 }
                 else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+                {
+                    isDragging = false;
+                }
+
+                // Touch input handling
+                if (!isDragging && isTouching)
+                {
+                    isDragging = true;
+                }
+
+                if (isDragging && isTouching)
+                {
+                    float nextValue = touchPos.x - minX;
+                    if (nextValue < 0.0f) nextValue = 0.0f;
+                    if (nextValue > maxWidth) nextValue = maxWidth;
+                    value = nextValue;
+                }
+                else if (isDragging && !isTouching && !IsMouseButtonDown(MOUSE_BUTTON_LEFT))
                 {
                     isDragging = false;
                 }

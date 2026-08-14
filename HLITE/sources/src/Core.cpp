@@ -22,6 +22,7 @@ typedef struct
 HliteIcon hliteIcon;
 Color backLightCols[3] = {RED, GREEN, BLUE};
 Color windowBkgCol = RAYWHITE;
+bool isSetAudio = true;
 
 void updateHliteIcon(HliteIcon& hlite, float scale)
 {   
@@ -88,6 +89,7 @@ namespace HLITE
         void Window::SetWindowFPS(int windowFps) { fps = windowFps; }
         void Window::SetWindowBackgroundColor(Color& backgroundColor) { windowBkgCol = backgroundColor; }
         void Window::SetHLITEIntro(bool status) { showIcon = status; }
+        void Window::SetAudio(const bool status) { isSetAudio = status; }
         int Window::GetWindowWidth() const { return windowWidth; }
         int Window::GetWindowHeight() const { return windowHeight; }
         const char *Window::GetWindowTitle() const { return windowTitle; }
@@ -95,10 +97,13 @@ namespace HLITE
         {
             if (windowWidth != 0 && windowHeight != 0 && windowTitle != nullptr)
             {
+                isSetAudio = this->isAudio;
+
                 std::printf("[HLITE] GUI window active!\n");
                 if (canResizeable) SetConfigFlags(FLAG_WINDOW_RESIZABLE);
                 InitWindow(windowWidth, windowHeight, windowTitle);
-                InitAudioDevice();
+                if (isSetAudio)
+                    InitAudioDevice();
                 
                 if (showIcon)
                 {
@@ -169,7 +174,8 @@ namespace HLITE
                 if (hliteIcon.isApear)
                     UnloadTexture(hliteIcon.icon);
                 WindowUnload();
-                CloseAudioDevice();
+                if (isSetAudio)
+                    CloseAudioDevice();
                 CloseWindow();
             }
         }

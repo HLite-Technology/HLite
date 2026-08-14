@@ -1,6 +1,8 @@
 #include <HLITE/Core.hpp>
 #include <HLITE/UserInterface.hpp>
 
+#include <format>
+
 using namespace HLITE;
 
 constinit CORE::Window wc(Vector2(400, 250),
@@ -46,7 +48,7 @@ void HLITEMain::Update()
     if (btnPress.Update())
     {
         pressCount++;
-        pressLabel.SetText(TextFormat("Press: %d", pressCount));
+        pressLabel.SetText(std::format("Press: {}", pressCount).data());
     }
 
     if (btnHold.Update())
@@ -58,7 +60,7 @@ void HLITEMain::Update()
             holdCount++;
             delay = 0.0f;
         }
-        holdLabel.SetText(TextFormat("Hold: %d", holdCount));
+        holdLabel.SetText(std::format("Hold: {}", holdCount).data());
     }
 }
 

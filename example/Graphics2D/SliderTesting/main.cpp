@@ -1,6 +1,7 @@
 #include <HLITE/Core.hpp>
 #include <HLITE/UserInterface.hpp>
 
+#include <format>
 #include <string_view>
 
 using namespace HLITE;
@@ -40,8 +41,8 @@ void HLITEMain::Update()
     sliderH.Update(); 
     sliderV.Update();
 
-    statusV = TextFormat("Vertical: %.2f", sliderV.GetValue());
-    statusH = TextFormat("Horizontal: %.2f", sliderH.GetValue());
+    statusV = std::format("Vertical: {}", sliderV.GetValue());
+    statusH = std::format("Horizontal: {}", sliderH.GetValue());
 
     slideHLabel.SetText(statusH.data());
     slideVLabel.SetText(statusV.data());
@@ -57,7 +58,7 @@ void HLITEMain::Update()
     slideVLabel.SetPosition({sliderV.GetPosition().x + MeasureTextEx(GetFontDefault(),
                                                                  statusV.data(),
                                                                  slideVLabel.GetSize(),
-                                                                 2).x / 2.0f - 75.0f,
+                                                                 2).x / 2.0f - 135.0f,
                              sliderV.GetPosition().y - MeasureTextEx(GetFontDefault(),
                                                                  statusV.data(),
                                                                  slideVLabel.GetSize(),

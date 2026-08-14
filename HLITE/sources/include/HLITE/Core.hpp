@@ -42,7 +42,7 @@ namespace HLITE
             /// @param fps The target window frame rate.
             explicit constexpr Window(const Vector2 sizeWindow, const char *windowTitle, const Color backgroundColor, const bool windowResizeable, const int fps)
                            : windowWidth(static_cast<int>(sizeWindow.x)), windowHeight(static_cast<int>(sizeWindow.y)),
-                           windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable), fps(fps), showIcon(true) {}
+                           windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable), fps(fps), showIcon(true), isAudio(true) {}
             /// @brief Creates a window configuration with the specified display settings and frame rate, display hlite icon.
             /// @param sizeWindow The initial window dimensions.
             /// @param windowTitle The title displayed in the window title bar.
@@ -50,9 +50,9 @@ namespace HLITE
             /// @param windowResizeable Whether the window can be resized.
             /// @param fps The target window frame rate.
             /// @param showHliteIcon To display the HLITE icon when first opened.
-            explicit constexpr Window(const Vector2 sizeWindow, const char *windowTitle, const Color backgroundColor, const bool windowResizeable, const int fps, const bool showHliteIcon)
+            explicit constexpr Window(const Vector2 sizeWindow, const char *windowTitle, const Color backgroundColor, const bool windowResizeable, const int fps, const bool showHliteIcon, const bool isSetAudio)
                            : windowWidth(static_cast<int>(sizeWindow.x)), windowHeight(static_cast<int>(sizeWindow.y)),
-                           windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable), fps(fps), showIcon(showHliteIcon) {}
+                           windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable), fps(fps), showIcon(showHliteIcon), isAudio(isSetAudio) {}
 
             /// @brief Sets the window dimensions.
             /// @param windowSize The new window dimensions.
@@ -72,6 +72,9 @@ namespace HLITE
             /// @brief To activate the HLITE framework intro.
             /// @param status Uses the `bool` data type.
             void SetHLITEIntro(bool status);
+            /// @brief To activate device audio.
+            /// @param status Variable with data type `bool`.
+            void SetAudio(const bool status);
 
             /// @brief Returns the configured window width.
             /// @return The window width in pixels.
@@ -94,6 +97,7 @@ namespace HLITE
             bool canResizeable = false;
             int fps = 60;
             bool showIcon = true;
+            bool isAudio = true;
         };
 
         // App running class.
