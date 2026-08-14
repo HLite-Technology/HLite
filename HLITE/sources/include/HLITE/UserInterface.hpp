@@ -10,6 +10,12 @@ namespace HLITE
     /// @brief User interfaces support.
     namespace UI
     {
+        typedef enum
+        {
+            PRESS,
+            DOWN
+        } ButtonPressType;
+
         /// @brief Text field all mode input text.
         typedef enum
         {
@@ -185,11 +191,11 @@ namespace HLITE
         {
         public:
             /// @brief Creates an empty button.
-            explicit Button(){}
+            explicit Button(){ modePress = ButtonPressType::PRESS; }
             /// @brief Creates a button with default visual settings.
             /// @param text The label displayed by the button.
-            explicit Button(const Label& text) : text(text), position({0.0f, 0.0f}), isHover(false), isClicked(false),
-            outlineColorBtn(BLACK), mainColorBtn(WHITE) {}
+            explicit Button(const Label& text) : text(text), position({0.0f, 0.0f}), modePress(ButtonPressType::PRESS),
+            isHover(false), isClicked(false), isTouched(false), outlineColorBtn(BLACK), mainColorBtn(WHITE) {}
             /// @brief Creates a button with explicit label, position, and colors.
             /// @param text The label displayed by the button.
             /// @param position The button position.
@@ -198,23 +204,28 @@ namespace HLITE
             explicit Button(
                 Label& text,
                 Vector2 position,
+                ButtonPressType& modePress,
                 Color OutlineColorBtn, 
                 Color MainColorBtn
-            ) : text(text), position(position), isHover(false), isClicked(false), 
+            ) : text(text), position(position), modePress(modePress),
+            isHover(false), isClicked(false), isTouched(false),
             outlineColorBtn(OutlineColorBtn), mainColorBtn(MainColorBtn) {}
 
             /// @brief Sets the label displayed by the button.
             /// @param text The new button label.
-            virtual void SetTextClass(const Label& text) { this->text = text; }
+            virtual void SetTextClass(const Label& text);
             /// @brief Sets the button position.
             /// @param position The new button position.
-            virtual void SetPosition(Vector2 position) { this->position = position; }
+            virtual void SetPosition(Vector2 position);
             /// @brief Sets the button main color.
             /// @param mainColor The new button main color.
-            virtual void SetMainColorBtn(Color mainColor) { mainColorBtn = mainColor; }
+            virtual void SetMainColorBtn(Color mainColor);
             /// @brief Sets the button outline color.
             /// @param outlineColor The new button outline color.
-            virtual void SetOutlineColorBtn(Color outlineColor) { outlineColorBtn = outlineColor; }
+            virtual void SetOutlineColorBtn(Color outlineColor);
+            /// @brief To set the button mode press or hold.
+            /// @param type Using the `ButtonPressType` enum.
+            virtual void SetModePress(ButtonPressType type);
 
             /// @brief Update logic button (return boolean button clicked or not).
             /// @return True or False if the button is pressed.
@@ -228,8 +239,10 @@ namespace HLITE
         private:
             Label text;
             Vector2 position;
+            ButtonPressType modePress;
             bool isHover;
             bool isClicked;
+            bool isTouched;
             Color outlineColorBtn;
             Color mainColorBtn;
             Rectangle rect;

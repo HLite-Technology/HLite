@@ -159,10 +159,51 @@ namespace HLITE
          * Primitive Button Class
          */
 
+        void Button::SetTextClass(const Label& text) { this->text = text; }
+        void Button::SetPosition(Vector2 position) { this->position = position; }
+        void Button::SetMainColorBtn(Color mainColor) { mainColorBtn = mainColor; }
+        void Button::SetOutlineColorBtn(Color outlineColor) { outlineColorBtn = outlineColor; }
+        void Button::SetModePress(ButtonPressType type) {modePress = type;}
+
         bool Button::Update()
         {
             Vector2 mousePos = GetMousePosition();
+            int touchCount = GetTouchPointCount();
         
+            bool touched = false;
+
+            for (int i = 0; i < touchCount; ++i)
+            {
+                Vector2 touchPos = GetTouchPosition(i);
+                if (CheckCollisionPointRec(touchPos, rect))
+                {
+                    touched = true;
+                    break;
+                }
+            }
+
+            if (modePress == ButtonPressType::DOWN)
+            {
+                if (touched) {
+                    isClicked = true;
+                    isTouched = true;
+                    return true;
+                }
+            }
+            else
+            {
+                if (touched && !isTouched) {
+                    isClicked = true;
+                    isTouched = true;
+                    return true;
+                }
+            }
+
+            if (!touched) {
+                isTouched = false;
+                isClicked = false;
+            }
+
             if (!CheckCollisionPointRec(mousePos, rect))
             {
                 isHover = false;
@@ -171,15 +212,30 @@ namespace HLITE
             else 
             {
                 isHover = true;
-                if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+                if (modePress == ButtonPressType::DOWN)
                 {
-                    isClicked = true;
-                    return true;
+                    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+                    {
+                        isClicked = true;
+                        return true;
+                    }
+                    else
+                    {
+                        isClicked = false;
+                        return false;
+                    }   
                 }
-                else
-                {
-                    isClicked = false;
-                    return false;
+                else{
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+                    {
+                        isClicked = true;
+                        return true;
+                    }
+                    else
+                    {
+                        isClicked = false;
+                        return false;
+                    }   
                 }
             }
             return false;
@@ -222,7 +278,7 @@ namespace HLITE
             }
             else
             {
-                if (!isClicked)
+                if (!isClicked || !isTouched)
                 {
                     // Background button
                     DrawRectangle(

@@ -54,7 +54,7 @@ void HLITEMain::Update()
 
     if (combine.Check2(IsKeyDown(KEY_LEFT_ALT),
                        IsKeyDown(KEY_R)))
-        isShowSubTitle = true;
+        isShowSubTitle = !isShowSubTitle;
 }
 
 void HLITEMain::Render()
