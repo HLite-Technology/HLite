@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PREPROCESSOR_HPP
+#define PREPROCESSOR_HPP
 
 #include <raylib.h>
 
@@ -42,3 +43,5 @@
 #define MB_BTN_NO (0x007UL)
 #define MB_BTN_CONTINUE (0x008UL)
 #define MB_BTN_TRY (0x009UL)
+
+#endif

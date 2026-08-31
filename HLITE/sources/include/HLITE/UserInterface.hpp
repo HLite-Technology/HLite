@@ -1,4 +1,5 @@
-#pragma once
+#ifndef USERINTERFACE_HPP
+#define USERINTERFACE_HPP
 
 #include <string>
 
@@ -668,3 +669,5 @@ namespace HLITE
         };
     }
 }
+
+#endif

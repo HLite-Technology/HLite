@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SHADER_HPP
+#define SHADER_HPP
 
 #include "Preprocessor.hpp"
 
@@ -102,3 +103,5 @@ namespace HLITE
         }
     }
 }
+
+#endif

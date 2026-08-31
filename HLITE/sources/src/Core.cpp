@@ -22,6 +22,7 @@ typedef struct
 HliteIcon hliteIcon;
 Color backLightCols[3] = {RED, GREEN, BLUE};
 Color windowBkgCol = RAYWHITE;
+bool isWindowRunning = false;
 bool isSetAudio = true;
 
 void updateHliteIcon(HliteIcon& hlite, float scale)
@@ -90,6 +91,7 @@ namespace HLITE
         void Window::SetWindowBackgroundColor(Color& backgroundColor) { windowBkgCol = backgroundColor; }
         void Window::SetHLITEIntro(bool status) { showIcon = status; }
         void Window::SetAudio(const bool status) { isSetAudio = status; }
+        void Window::Dispatch() { isWindowActive = false; isWindowRunning = false; }
         int Window::GetWindowWidth() const { return windowWidth; }
         int Window::GetWindowHeight() const { return windowHeight; }
         const char *Window::GetWindowTitle() const { return windowTitle; }
@@ -97,6 +99,7 @@ namespace HLITE
         {
             if (windowWidth != 0 && windowHeight != 0 && windowTitle != nullptr)
             {
+                isWindowRunning = this->isWindowActive;
                 isSetAudio = this->isAudio;
 
                 std::printf("[HLITE] GUI window active!\n");
@@ -155,7 +158,7 @@ namespace HLITE
             
             if (IsWindowReady())
             {
-                while (!WindowShouldClose())
+                while (isWindowRunning && !WindowShouldClose())
                 {
                     updateHliteIcon(hliteIcon, 255.0f);
 

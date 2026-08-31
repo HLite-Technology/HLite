@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GRAPHICS2D_HPP
+#define GRAPHICS2D_HPP
 
 #include <array>
 
@@ -142,3 +143,5 @@ namespace HLITE
         };
     }
 }
+
+#endif

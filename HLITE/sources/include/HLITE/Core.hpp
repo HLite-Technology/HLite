@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CORE_HPP
+#define CORE_HPP
 
 #include "Preprocessor.hpp"
 
@@ -33,7 +34,8 @@ namespace HLITE
             /// @param windowResizeable Whether the window can be resized.
             explicit constexpr Window(const Vector2 sizeWindow, const char *windowTitle, const Color backgroundColor, const bool windowResizeable) : 
                            windowWidth(static_cast<int>(sizeWindow.x)), windowHeight(static_cast<int>(sizeWindow.y)), 
-                           windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable) {}
+                           windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable),
+                           fps(60), showIcon(true), isAudio(true), isWindowActive(true) {}
             /// @brief Creates a window configuration with the specified display settings and frame rate.
             /// @param sizeWindow The initial window dimensions.
             /// @param windowTitle The title displayed in the window title bar.
@@ -42,7 +44,8 @@ namespace HLITE
             /// @param fps The target window frame rate.
             explicit constexpr Window(const Vector2 sizeWindow, const char *windowTitle, const Color backgroundColor, const bool windowResizeable, const int fps)
                            : windowWidth(static_cast<int>(sizeWindow.x)), windowHeight(static_cast<int>(sizeWindow.y)),
-                           windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable), fps(fps), showIcon(true), isAudio(true) {}
+                           windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable),
+                           fps(fps), showIcon(true), isAudio(true), isWindowActive(true) {}
             /// @brief Creates a window configuration with the specified display settings and frame rate, display hlite icon.
             /// @param sizeWindow The initial window dimensions.
             /// @param windowTitle The title displayed in the window title bar.
@@ -52,7 +55,8 @@ namespace HLITE
             /// @param showHliteIcon To display the HLITE icon when first opened.
             explicit constexpr Window(const Vector2 sizeWindow, const char *windowTitle, const Color backgroundColor, const bool windowResizeable, const int fps, const bool showHliteIcon, const bool isSetAudio)
                            : windowWidth(static_cast<int>(sizeWindow.x)), windowHeight(static_cast<int>(sizeWindow.y)),
-                           windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable), fps(fps), showIcon(showHliteIcon), isAudio(isSetAudio) {}
+                           windowTitle(windowTitle), backgroundColor(backgroundColor),  canResizeable(windowResizeable),
+                           fps(fps), showIcon(showHliteIcon), isAudio(isSetAudio), isWindowActive(true) {}
 
             /// @brief Sets the window dimensions.
             /// @param windowSize The new window dimensions.
@@ -75,6 +79,8 @@ namespace HLITE
             /// @brief To activate device audio.
             /// @param status Variable with data type `bool`.
             void SetAudio(const bool status);
+            /// @brief To safely close applications while they are running.
+            void Dispatch();
 
             /// @brief Returns the configured window width.
             /// @return The window width in pixels.
@@ -98,6 +104,7 @@ namespace HLITE
             int fps = 60;
             bool showIcon = true;
             bool isAudio = true;
+            bool isWindowActive;
         };
 
         // App running class.
@@ -118,3 +125,5 @@ namespace HLITE
         }
     }
 }
+
+#endif

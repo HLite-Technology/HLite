@@ -1,4 +1,5 @@
-#pragma once
+#ifndef UTILITY_HPP
+#define UTILITY_HPP
 
 #include <string>
 
@@ -120,3 +121,5 @@ namespace HLITE
         };
     }
 }
+
+#endif
