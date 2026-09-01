@@ -1,4 +1,4 @@
-<img src="hlite-icon.png" alt="hlite-icon" width="200" height="200" align="left">
+<img src="hlite-icon.png" alt="hlite-icon" width="220" height="220" align="left">
 
 **HLITE Framework (High Lightweight Graphical Framework)**
 
