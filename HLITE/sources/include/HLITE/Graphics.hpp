@@ -1,5 +1,5 @@
-#ifndef GRAPHICS2D_HPP
-#define GRAPHICS2D_HPP
+#ifndef GRAPHICS_HPP
+#define GRAPHICS_HPP
 
 #include <array>
 

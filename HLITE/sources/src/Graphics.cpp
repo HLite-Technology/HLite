@@ -1,4 +1,4 @@
-#include "../include/HLITE/Graphics2D.hpp"
+#include "../include/HLITE/Graphics.hpp"
 
 #include <array>
 #include <cmath>

@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(exec_name "main") # Your main executable name.
-set(main_code "example/Graphics2D/HBrickSample/main.cpp") # Your main source code.
+set(main_code "example/Graphics2D/BasicWindow/main.cpp") # Your main source code.
 
 set(hlite_name_static "hlite")
 set(HLITE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/HLITE/sources")
@@ -18,7 +18,7 @@ add_library(${hlite_name_static}
     "${HLITE_DIR}/src/Core.cpp"
     "${HLITE_DIR}/src/Utility.cpp"
     "${HLITE_DIR}/src/File.cpp"
-    "${HLITE_DIR}/src/Graphics2D.cpp"
+    "${HLITE_DIR}/src/Graphics.cpp"
     "${HLITE_DIR}/src/HLiteMain.cpp"
     "${HLITE_DIR}/src/Shader.cpp"
     "${HLITE_DIR}/src/UserInterface.cpp"
