@@ -42,9 +42,6 @@ HLITE is very suitable for computers with low specifications because it does not
 
 More details can be found in the HLite API reference documentation.
 
-> [!NOTE]
-> Currently, the HLITE features support more for 2D games, although it is possible to create 3D games with Raylib directly.
-
 ---
 
 ## Simple HLITE Code Structure
