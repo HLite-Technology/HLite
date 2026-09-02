@@ -188,7 +188,7 @@ If the `pull request` matches then it will be merged into the main code, but if 
 
 - [HLITE Quick Use Guide](QUICK_USE.md)
 - [HLITE Documentation](#)
-- [HLITE Example](https://github.com/HLite-Technology/HLite/tree/main/example)
+- [HLITE Example Code](https://github.com/HLite-Technology/HLite/tree/main/example)
 - [HBRICK Binary Packer](https://github.com/HLite-Technology/HBrick)
 
 ---
