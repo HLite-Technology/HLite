@@ -142,7 +142,10 @@ These conditions apply to those who want to become a contributor or only use HLI
 
 ## Download Quick HLITE
 
-You can download it directly on the right, without having to build source code and install libraries like Raylib again.
+You can download it directly in the release section, without having to build source code and install libraries like Raylib again.
+
+> [!TIP]
+> Read the HLITE Quick Use Guide section to make it easier to compile the project.
 
 ---
 
@@ -183,6 +186,7 @@ If the `pull request` matches then it will be merged into the main code, but if 
 
 ## HLite Learning Docs and Tools
 
+- [HLITE Quick Use Guide](QUICK_USE.md)
 - [HLITE Documentation](#)
 - [HLITE Example](https://github.com/HLite-Technology/HLite/tree/main/example)
 - [HBRICK Binary Packer](https://github.com/HLite-Technology/HBrick)
