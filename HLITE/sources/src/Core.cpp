@@ -88,7 +88,7 @@ namespace HLITE
         void Window::SetWindowTitle(const char *windowTitle) { this->windowTitle = windowTitle; }
         void Window::SetWindowResizeable(bool resizeable) { canResizeable = resizeable; }
         void Window::SetWindowFPS(int windowFps) { fps = windowFps; }
-        void Window::SetWindowBackgroundColor(Color& backgroundColor) { windowBkgCol = backgroundColor; }
+        void Window::SetWindowBackgroundColor(Color backgroundColor) { windowBkgCol = backgroundColor; }
         void Window::SetHLITEIntro(bool status) { showIcon = status; }
         void Window::SetAudio(const bool status) { isSetAudio = status; }
         void Window::Dispatch() { isWindowActive = false; isWindowRunning = false; }

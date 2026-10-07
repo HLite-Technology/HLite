@@ -47,44 +47,12 @@ More details can be found in the HLite API reference documentation.
 ## Simple HLITE Code Structure
 
 ```cpp
-#include <HLITE/Core.hpp> // Mandatory header which is a HLITE structure.
+#include <HLITE/Core.hpp>
 
-/*
- * A place to create variables with global scope,
- * so that it can be accessed by all section.
-*/
-
-void HLITEMain::Init()
-{
-    /* 
-     * Initialization section when
-     * the application is first run.
-    */
-}
-
-void HLITEMain::Update()
-{
-    /*
-     * The section where the logic of variable processing, 
-     * for example arithmetic, occurs when the application is running.
-    */
-}
-
-void HLITEMain::Render()
-{
-    /*
-     * The section where a GUI display or
-     * an object is rendered and on the screen.
-    */
-}
-
-void HLITEMain::Unload()
-{
-    /*
-     * Section all objects that need
-     * to be closed or unloaded.
-    */
-}
+void HLITEMain::Init(){}
+void HLITEMain::Update(){}
+void HLITEMain::Render(){}
+void HLITEMain::Unload(){}
 ```
 
 In this structure there are 4 main function parts `void Init();`, `void Update();`,
@@ -93,6 +61,9 @@ Every variable that is created must be created outside the section (global scope
 Each initialization must be put in a section `void Init();`. Any updates in the logic inside `void Update();`.
 Every display on the screen must be rendered in parts `void Render();`.
 Every object that must be closed or unloaded must be placed in a section `void Unload();`.
+
+> [!IMPORTANT]
+> The functions `BeginDrawing();`, `EndDrawing();`, and `CloseWindow();` are not needed, HLite Framework takes care of that. By default `InitAudioDevice();` and `CloseAudioDevice();` are active in the HLite Framework, you can set them with the `SetAudio(const bool status);` method from `class Window`.
 
 > [!NOTE]
 > The main code structure of HLITE is inspired by Arduino, does not use the main function, only HLITE has 4 sections.

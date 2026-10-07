@@ -72,7 +72,7 @@ namespace HLITE
             void SetWindowFPS(int windowFps);
             /// @brief Sets the window background color.
             /// @param backgroundColor The new background color.
-            void SetWindowBackgroundColor(Color& backgroundColor);
+            void SetWindowBackgroundColor(Color backgroundColor);
             /// @brief To activate the HLITE framework intro.
             /// @param status Uses the `bool` data type.
             void SetHLITEIntro(bool status);
