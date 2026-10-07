@@ -63,7 +63,10 @@ Every display on the screen must be rendered in parts `void Render();`.
 Every object that must be closed or unloaded must be placed in a section `void Unload();`.
 
 > [!IMPORTANT]
-> The functions `BeginDrawing();`, `EndDrawing();`, and `CloseWindow();` are not needed, HLite Framework takes care of that. By default `InitAudioDevice();` and `CloseAudioDevice();` are active in the HLite Framework, you can set them with the `SetAudio(const bool status);` method from `class Window`.
+> The functions `BeginDrawing();`, `EndDrawing();`, and `CloseWindow();` are not needed, HLite Framework takes care of that.
+
+> [!IMPORTANT]
+> By default `InitAudioDevice();` and `CloseAudioDevice();` are active in the HLite Framework, you can set them with the `SetAudio(const bool status);` method from `class Window`.
 
 > [!NOTE]
 > The main code structure of HLITE is inspired by Arduino, does not use the main function, only HLITE has 4 sections.
